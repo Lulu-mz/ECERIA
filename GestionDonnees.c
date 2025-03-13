@@ -1,0 +1,111 @@
+//
+// Created by viola on 05/02/2025.
+//
+
+#include "GestionDonnees.h"
+#include <stdio.h>
+#include <string.h>
+#define MAX_NOM 50
+
+//Recherche du nom du joueur
+int joueurEstInscrit(const char *nomJoueur) {
+    FILE *fichier = fopen("joueurs.csv", "r");
+    if (fichier == NULL) {
+        return 0; // Le fichier n'existe pas encore, donc le joueur n'est pas inscrit
+    }
+
+    char nom[MAX_NOM];
+    int bois, pierre, eau, poisson, fruit; // Variables temporaires pour ignorer les ressources
+
+    while (fscanf(fichier, "%49[^,],%d,%d,%d,%d,%d\n", nom, &bois, &pierre, &eau, &poisson, &fruit) != EOF) {
+        if (strcmp(nom, nomJoueur) == 0) {
+            fclose(fichier);
+            return 1; // Joueur trouvé
+        }
+    }
+
+    fclose(fichier);
+    return 0; // Joueur non trouvé
+}
+
+
+
+//Ajoute un joueur SI IL EST NOUVEAU
+void enregistrerJoueurDansCSV(Joueur *j) {
+    FILE *fichier = fopen("joueurs.csv", "a"); // Ouvre en mode ajout
+
+    if (fichier == NULL) {
+        printf("Erreur : Impossible d'ouvrir le fichier joueurs.csv !\n");
+        return;
+    }
+    // Calculer la somme des fournitures pour les 15 emplacements
+    int totalBois = 0, totalPierre = 0, totalEau = 0, totalPoisson = 0, totalFruit = 0;
+
+    for (int i = 0; i < 15; i++) {
+        totalBois += j->items.bois[i];
+        totalPierre += j->items.pierre[i];
+        totalEau += j->items.eau[i];
+        totalPoisson += j->items.poisson[i];
+        totalFruit += j->items.fruit[i];
+    }
+
+    // Écriture des informations du joueur avec la somme totale de ses fournitures
+    fprintf(fichier, "%s,%d,%d,%d,%d,%d\n",
+            j->nom, totalBois, totalPierre, totalEau, totalPoisson, totalFruit);
+
+    fclose(fichier); // Ferme le fichier
+    printf("Le joueur %s a été enregistré avec ses fournitures dans joueurs.csv.\n", j->nom);
+}
+
+
+
+//Met à jour les informations d'un joueur EXISTANT
+void mettreAJourJoueurDansCSV(Joueur *j) {
+    FILE *fichier = fopen("joueurs.csv", "r");
+    FILE *temp = fopen("temp.csv", "w");
+
+    if (fichier == NULL || temp == NULL) {
+        printf("Erreur : Impossible d'ouvrir les fichiers !\n");
+        return;
+    }
+
+    char nomFichier[MAX_NOM];
+    int totalBois, totalPierre, totalEau, totalPoisson, totalFruit;
+    int joueurTrouve = 0;
+
+    while (fscanf(fichier, "%49[^,],%d,%d,%d,%d,%d\n",
+                  nomFichier, &totalBois, &totalPierre, &totalEau, &totalPoisson, &totalFruit) != EOF) {
+        if (strcmp(nomFichier, j->nom) == 0) {
+            joueurTrouve = 1;
+
+            // Recalcule les totaux mis à jour
+            int newTotalBois = 0, newTotalPierre = 0, newTotalEau = 0, newTotalPoisson = 0, newTotalFruit = 0;
+            for (int i = 0; i < 15; i++) {
+                newTotalBois += j->items.bois[i];
+                newTotalPierre += j->items.pierre[i];
+                newTotalEau += j->items.eau[i];
+                newTotalPoisson += j->items.poisson[i];
+                newTotalFruit += j->items.fruit[i];
+            }
+
+            // Écriture des nouvelles valeurs mises à jour
+            fprintf(temp, "%s,%d,%d,%d,%d,%d\n",
+                    j->nom, newTotalBois, newTotalPierre, newTotalEau, newTotalPoisson, newTotalFruit);
+        } else {
+            // Écriture des anciennes valeurs pour les autres joueurs
+            fprintf(temp, "%s,%d,%d,%d,%d,%d\n",
+                    nomFichier, totalBois, totalPierre, totalEau, totalPoisson, totalFruit);
+        }
+                  }
+
+    fclose(fichier);
+    fclose(temp);
+    remove("joueurs.csv");
+    rename("temp.csv", "joueurs.csv");
+
+    if (joueurTrouve) {
+        printf("Les informations du joueur %s ont ete mises a jour dans joueurs.csv.\n", j->nom);
+    } else {
+        printf("Erreur : Joueur %s non trouve dans joueurs.csv !\n", j->nom);
+    }
+}
