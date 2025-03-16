@@ -53,19 +53,19 @@ int animation()
             afficherJoueur(joueur, currentFrame);
             al_flip_display();
         }
-        if(al_key_down(&keyboard_state,ALLEGRO_KEY_RIGHT)) {
+        if(al_key_down(&keyboard_state,ALLEGRO_KEY_D)) {
             joueur->direction = DROITE;
             deplacerJoueur(joueur);
         }
-        else if(al_key_down(&keyboard_state,ALLEGRO_KEY_LEFT)) {
+        else if(al_key_down(&keyboard_state,ALLEGRO_KEY_Q)) {
             joueur->direction = GAUCHE;
             deplacerJoueur(joueur);
         }
-        else if(al_key_down(&keyboard_state,ALLEGRO_KEY_UP)) {
+        else if(al_key_down(&keyboard_state,ALLEGRO_KEY_Z)) {
             joueur->direction = HAUT;
             deplacerJoueur(joueur);
         }
-        else if(al_key_down(&keyboard_state,ALLEGRO_KEY_DOWN)) {
+        else if(al_key_down(&keyboard_state,ALLEGRO_KEY_S)) {
             joueur->direction = BAS;
             deplacerJoueur(joueur);
         }
