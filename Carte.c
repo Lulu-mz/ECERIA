@@ -16,9 +16,9 @@ Carte* chargerCarte(int mapWidth, int mapHeight) {
         carte->map[i] = malloc(mapWidth*sizeof(Case));
     }
 
-    ALLEGRO_BITMAP* herbe = al_load_bitmap("../Tiles/tile_0000.png");
-    ALLEGRO_BITMAP* herbe2 = al_load_bitmap("../Tiles/tile_0001.png");
-    ALLEGRO_BITMAP* fleur = al_load_bitmap("../Tiles/tile_0002.png");
+    ALLEGRO_BITMAP* herbe = al_load_bitmap("../Assets/Tiles/tile_0000.png");
+    ALLEGRO_BITMAP* herbe2 = al_load_bitmap("../Assets/Tiles/tile_0001.png");
+    ALLEGRO_BITMAP* fleur = al_load_bitmap("../Assets/Tiles/tile_0002.png");
     if(!herbe || !herbe2 || !fleur) {
         printf("Erreur de chargement de l'image\n");
         exit(1);

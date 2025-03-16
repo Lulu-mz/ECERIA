@@ -1,285 +1,74 @@
-//
-// Created by viola on 04/02/2025.
-//
 #include "Jeu.h"
+#include "Carte.h"
+#include "Joueur.h"
 
-//NOUVELLE PARTIE
-void nouvellePartie(Joueur *j) {
-    FILE *fichier = fopen("joueurs.csv", "r");
-    FILE *temp = fopen("temp.csv", "w"); // Fichier temporaire pour réécrire les données
-
-    if (fichier == NULL || temp == NULL) {
-        printf("Erreur : Impossible d'ouvrir les fichiers !\n");
-        return;
+void installation() {
+    if (!al_init()) {
+        printf("Une erreur est survenue lors de l'installation\n");
+        exit(1);
     }
+    al_init_primitives_addon();
+    al_install_keyboard();
+    al_install_mouse();
+    al_init_image_addon();
+}
 
-    char nomFichier[50];
-    int bois, pierre, eau, poisson, fruit;
-    int joueurTrouve = 0;
+void registerEventSource(ALLEGRO_DISPLAY *display, ALLEGRO_TIMER *timer, ALLEGRO_EVENT_QUEUE *queue) {
+    al_register_event_source(queue, al_get_display_event_source(display));
+    al_register_event_source(queue, al_get_timer_event_source(timer));
+    al_register_event_source(queue, al_get_mouse_event_source());
+    al_register_event_source(queue, al_get_keyboard_event_source());
+}
 
-    // Lecture et réécriture des joueurs existants
-    while (fscanf(fichier, "%49[^,],%d,%d,%d,%d,%d\n", nomFichier, &bois, &pierre, &eau, &poisson, &fruit) != EOF) {
-        if (strcmp(nomFichier, j->nom) == 0) {
-            joueurTrouve = 1;
-            // Réinitialise ses ressources à 0
-            fprintf(temp, "%s,0,0,0,0,0\n", j->nom);
-        } else {
-            // Réécrit les autres joueurs sans modification
-            fprintf(temp, "%s,%d,%d,%d,%d,%d\n", nomFichier, bois, pierre, eau, poisson, fruit);
+int animation()
+{
+    installation();
+
+    ALLEGRO_DISPLAY *window = al_create_display(WIDTH, HEIGHT);
+    ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue();
+    ALLEGRO_TIMER *timer = al_create_timer(1.0 / 60); // 60 FPS
+
+    registerEventSource(window, timer, queue);
+
+    bool running = true;
+    al_start_timer(timer);
+    Joueur *joueur = createJoueur();
+    Carte* carte = chargerCarte(WIDTH/16, HEIGHT/16);
+
+    ALLEGRO_KEYBOARD_STATE keyboard_state;
+
+    while (running)
+    {
+        ALLEGRO_EVENT event;
+        al_wait_for_event(queue, &event);
+        al_get_keyboard_state(&keyboard_state);
+        if(event.type == ALLEGRO_EVENT_DISPLAY_CLOSE){
+            running = false;
+        }
+        if(event.type == ALLEGRO_EVENT_TIMER){
+            // al_clear_to_color(al_map_rgb(0,0,0));
+            afficherCarte(carte);
+            afficherJoueur(joueur);
+            al_flip_display();
+        }
+        if(al_key_down(&keyboard_state,ALLEGRO_KEY_RIGHT)) {
+            joueur->direction = DROITE;
+            deplacerJoueur(joueur);
+        }
+        if(al_key_down(&keyboard_state,ALLEGRO_KEY_LEFT)) {
+            joueur->direction = GAUCHE;
+            deplacerJoueur(joueur);
+        }
+        if(al_key_down(&keyboard_state,ALLEGRO_KEY_UP)) {
+            joueur->direction = HAUT;
+            deplacerJoueur(joueur);
+        }
+        if(al_key_down(&keyboard_state,ALLEGRO_KEY_DOWN)) {
+            joueur->direction = BAS;
+            deplacerJoueur(joueur);
         }
     }
-
-    fclose(fichier);
-
-    // Si le joueur n'existe pas, on l'ajoute avec toutes ses ressources à 0
-    if (!joueurTrouve) {
-        fprintf(temp, "%s,0,0,0,0,0\n", j->nom);
-    }
-
-    fclose(temp);
-
-    // Remplace l'ancien fichier par le nouveau
-    remove("joueurs.csv");
-    rename("temp.csv", "joueurs.csv");
-
-    // Réinitialise aussi les ressources dans la structure du joueur
-    for (int i = 0; i < 15; i++) {
-        j->items.bois[i] = 0;
-        j->items.pierre[i] = 0;
-        j->items.eau[i] = 0;
-        j->items.poisson[i] = 0;
-        j->items.fruit[i] = 0;
-    }
-
-    if (joueurTrouve) {
-        printf("Les ressources de %s ont été réinitialisées à 0.\n", j->nom);
-    } else {
-        printf("%s n'était pas inscrit. Il a été ajouté avec des ressources initialisées à 0.\n", j->nom);
-    }
-}
-
-
-//QUETES
-
-// Fonction qui vérifie si le stockage de bois est plein
-int estBoisRempli(Joueur *j) {
-    for (int i = 0; i < 15; i++) {
-        if (j->items.bois[i] == 0) {
-            return 0; // Il reste de la place
-        }
-    }
-    return 1; // Le stockage est plein
-}
-
-
-void quete1(Joueur *j) {
-    if (estBoisRempli(j)) {
-        printf("Votre stockage de bois est plein ! Vous ne pouvez plus couper d'arbres.\n");
-        return;
-    }
-
-    int choix;
-    do {
-        printf("Que voulez-vous faire ?\n"
-            "1. Couper un arbre (+2 bois)\n"
-            "2. Ne rien faire (Quitter la quete)\n");
-        scanf("%d", &choix);
-
-        switch (choix) {
-            case 1:
-                // Trouver le premier emplacement vide dans le stockage de bois
-                for (int i = 0; i < 15; i++) {
-                    if (j->items.bois[i] == 0) {
-                        j->items.bois[i] = 2; // Ajouter 2 tranches de bois
-                        break;
-                    }
-                }
-
-                printf("Vous avez coupe un arbre ! (+2 bois)\n");
-
-            // Mettre à jour le fichier CSV
-                mettreAJourJoueurDansCSV(j);
-
-                if (estBoisRempli(j)) {
-                    printf("Votre stockage de bois est maintenant plein !\n");
-                    return;
-                }
-                break;
-
-            case 2:
-                printf("Vous quittez la quete.\n");
-                return;
-
-            default:
-                printf("Choix invalide, essayez encore.\n");
-                break;
-        }
-    } while (1);
-}
-
-#define MAX_POISSON 14 // Nombre maximum de poissons stockables
-
-
-// Fonction qui vérifie si le stockage de poissons est plein
-int poissonEstRempli(Joueur *j) {
-    int totalPoisson = 0;
-    for (int i = 0; i < 15; i++) {
-        totalPoisson += j->items.poisson[i];
-    }
-    return totalPoisson >= MAX_POISSON; // Vrai si on a atteint 14 poissons
-}
-
-
-void quete2(Joueur *j) {
-    if (poissonEstRempli(j)) {
-        printf("Votre stockage de poissons est plein ! Vous ne pouvez plus aller pecher.\n");
-        return;
-    }
-
-    srand(time(NULL)); // Initialisation de l’aléatoire
-
-    int choix;
-    do {
-        printf("Que voulez-vous faire ?\n"
-            "1. Aller pecher (1 ou 2 poissons selon la peche)\n"
-            "2. Ne rien faire (Quitter la quete)\n");
-        scanf("%d", &choix);
-
-        switch (choix) {
-            case 1: {
-                if (poissonEstRempli(j)) {
-                    printf("Votre stockage de poissons est maintenant plein !\n");
-                    return;
-                }
-
-                // Tirage aléatoire du type de pêche
-                int poissonGagne = (rand() % 100 < 20) ? 2 : 1; // 20% de chance pour 2 poissons
-
-                // Trouver le premier emplacement disponible pour stocker le poisson
-                for (int i = 0; i < 15; i++) {
-                    if (j->items.poisson[i] == 0) {
-                        if (poissonGagne + j->items.poisson[i] > MAX_POISSON) {
-                            poissonGagne = MAX_POISSON - j->items.poisson[i]; // Ajuste pour ne pas dépasser la limite
-                        }
-                        j->items.poisson[i] += poissonGagne;
-                        break;
-                    }
-                }
-
-                // Affichage du résultat de la pêche
-                if (poissonGagne == 2) {
-                    printf("Bonne peche ! (+2 poissons)\n");
-                } else {
-                    printf("Peche normale (+1 poisson)\n");
-                }
-
-                // Mise à jour du fichier CSV
-                mettreAJourJoueurDansCSV(j);
-
-                // Vérification après mise à jour
-                if (poissonEstRempli(j)) {
-                    printf("Votre stockage de poissons est maintenant plein !\n");
-                    return;
-                }
-                break;
-            }
-
-            case 2:
-                printf("Vous quittez la quete.\n");
-                return;
-
-            default:
-                printf("Choix invalide, essayez encore.\n");
-                break;
-        }
-    } while (1);
-}
-
-
-
-#define MAX_PIERRE 14 // Nombre maximum de pierres stockables
-
-// Fonction qui vérifie si le stockage de pierres est plein
-int pierreEstRempli(Joueur *j) {
-    int totalPierre = 0;
-    for (int i = 0; i < 15; i++) {
-        totalPierre += j->items.pierre[i]; // Somme des pierres stockées
-    }
-    return totalPierre >= MAX_PIERRE; // Retourne vrai si la limite est atteinte
-}
-
-void quete3(Joueur *j) {
-    if (pierreEstRempli(j)) {
-        printf("Votre stockage de pierres est plein ! Vous ne pouvez plus en ramasser.\n");
-        return;
-    }
-
-    int choix;
-    do {
-        printf("Que voulez-vous faire ?\n"
-               "1. Ramasser des pierres (+2 pierres)\n"
-               "2. Ne rien faire (Quitter la quete)\n");
-        scanf("%d", &choix);
-
-        switch (choix) {
-            case 1: {
-                if (pierreEstRempli(j)) {
-                    printf("Votre stockage de pierres est maintenant plein !\n");
-                    return;
-                }
-
-                int pierresAjoutees = 0; // Nombre de pierres ajoutées
-
-                // Remplir deux cases vides si possible
-                for (int i = 0; i < 15 && pierresAjoutees < 2; i++) {
-                    if (j->items.pierre[i] == 0) {
-                        j->items.pierre[i] = 1; // Ajoute une pierre dans une case vide
-                        pierresAjoutees++;
-                    }
-                }
-
-                printf("Vous avez ramasse deux grosses pierres ! (+2 pierres)\n");
-
-                // Mise à jour du fichier CSV
-                mettreAJourJoueurDansCSV(j);
-
-                if (pierreEstRempli(j)) {
-                    printf("Votre stockage de pierres est maintenant plein !\n");
-                    return;
-                }
-                break;
-            }
-
-            case 2:
-                printf("Vous quittez la quete.\n");
-                return;
-
-            default:
-                printf("Choix invalide, essayez encore.\n");
-                break;
-        }
-    } while (1);
-}
-
-
-
-void chercherQuete(Joueur *j) {
-    int num_quete = 0;
-    printf("1. Quete 1\n"
-        "2. Quete 2 \n"
-        "3. Quete 3 \n");
-    scanf("%d", &num_quete);
-    if (num_quete != 0) {
-        switch (num_quete) {
-            case 1:
-                quete1(j);
-                break;
-            case 2:
-                quete2(j);
-                break;
-            case 3:
-                quete3(j);
-                break;
-        }
-    }
+    destroyJoueur(joueur);
+    destroyCarte(carte);
+    return 0;
 }

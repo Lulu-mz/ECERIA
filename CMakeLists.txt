@@ -8,14 +8,9 @@ add_executable(Projet_ft__Supdepub main.c
         Joueur.h
         Jeu.c
         Jeu.h
-        GestionDonnees.c
-        GestionDonnees.h
-        Menu.c
-        Menu.h
-        Animation.h
-        Animation.c
         Carte.c
-        Carte.h)
+        Carte.h
+        Constantes.h)
 IF(WIN32)
     target_link_libraries(Projet_ft__Supdepub -lmingw32 -lallegro-5.0.10-monolith-md-debug)
 ELSE()
