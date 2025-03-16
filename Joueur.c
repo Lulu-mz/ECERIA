@@ -36,42 +36,36 @@ void destroyJoueur(Joueur* joueur) {
 }
 
 
-void afficherJoueur(Joueur* joueur) {
+void afficherJoueur(Joueur* joueur, int currentFrame) {
+    printf("%d\n", joueur->direction);
     switch(joueur->direction) {
         case DROITE :
-            joueur->sprite_x = 3.0f;
+            joueur->sprite_x = 2.0f;
             joueur->sprite_y = 3.0f;
         break;
 
         case GAUCHE :
-            joueur->sprite_x = 3.0f;
+            joueur->sprite_x = 2.0f;
             joueur->sprite_y = 2.0f;
         break;
 
         case BAS :
-            joueur->sprite_x = 3.0f;
+            joueur->sprite_x = 2.0f;
             joueur->sprite_y = 0.0f;
         break;
 
         case HAUT :
-            joueur->sprite_x = 3.0f;
+            joueur->sprite_x = 2.0f;
             joueur->sprite_y = 1.0f;
         break;
 
         case STATIQUE :
             if(joueur->sprite_x>0){
-            joueur->sprite_x-=2.0f;
+            joueur->sprite_x=0.0f;
             }
         break;
     }
-    if(joueur->sprite_x - 3 < 0.01f) {
-        joueur->sprite_x = 2;
-    }
-    else if (joueur->sprite_x - 2 < 0.01f) {
-        joueur->sprite_x = 3;
-    }
-    //printf("%f",joueur->sprite_x);
-    al_draw_bitmap_region(joueur->image, joueur->sprite_x*48, joueur->sprite_y*48, 48, 48, joueur->x1, joueur->y1, 0);
+    al_draw_bitmap_region(joueur->image, (joueur->sprite_x+currentFrame)*48, joueur->sprite_y*48, 48, 48, joueur->x1, joueur->y1, 0);
 }
 
 

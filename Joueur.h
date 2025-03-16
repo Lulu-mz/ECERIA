@@ -24,6 +24,6 @@ typedef struct j {
 
 Joueur* createJoueur();
 void destroyJoueur(Joueur* joueur);
-void afficherJoueur(Joueur* joueur);
+void afficherJoueur(Joueur* joueur, int curentFrame);
 void deplacerJoueur(Joueur* joueur);
 #endif //JOUEUR_H

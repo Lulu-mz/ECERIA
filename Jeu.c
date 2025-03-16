@@ -37,6 +37,9 @@ int animation()
 
     ALLEGRO_KEYBOARD_STATE keyboard_state;
 
+    int currentFrame = 0;
+    int frameTime = 0;
+
     while (running)
     {
         ALLEGRO_EVENT event;
@@ -46,26 +49,34 @@ int animation()
             running = false;
         }
         if(event.type == ALLEGRO_EVENT_TIMER){
-            // al_clear_to_color(al_map_rgb(0,0,0));
             afficherCarte(carte);
-            afficherJoueur(joueur);
+            afficherJoueur(joueur, currentFrame);
             al_flip_display();
         }
         if(al_key_down(&keyboard_state,ALLEGRO_KEY_RIGHT)) {
             joueur->direction = DROITE;
             deplacerJoueur(joueur);
         }
-        if(al_key_down(&keyboard_state,ALLEGRO_KEY_LEFT)) {
+        else if(al_key_down(&keyboard_state,ALLEGRO_KEY_LEFT)) {
             joueur->direction = GAUCHE;
             deplacerJoueur(joueur);
         }
-        if(al_key_down(&keyboard_state,ALLEGRO_KEY_UP)) {
+        else if(al_key_down(&keyboard_state,ALLEGRO_KEY_UP)) {
             joueur->direction = HAUT;
             deplacerJoueur(joueur);
         }
-        if(al_key_down(&keyboard_state,ALLEGRO_KEY_DOWN)) {
+        else if(al_key_down(&keyboard_state,ALLEGRO_KEY_DOWN)) {
             joueur->direction = BAS;
             deplacerJoueur(joueur);
+        }
+        else {
+            joueur->direction = STATIQUE;
+            deplacerJoueur(joueur);
+        }
+        frameTime+=16;
+        if(frameTime>=600) {
+            currentFrame=(currentFrame+1)%2 ;
+            frameTime = 0;
         }
     }
     destroyJoueur(joueur);
