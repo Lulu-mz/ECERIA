@@ -48,6 +48,9 @@ int animation()
         if(event.type == ALLEGRO_EVENT_DISPLAY_CLOSE){
             running = false;
         }
+        if(event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_E) {
+            action(joueur, carte);
+        }
         if(event.type == ALLEGRO_EVENT_TIMER){
             afficherCarte(carte);
             afficherJoueur(joueur, currentFrame);
@@ -55,23 +58,23 @@ int animation()
         }
         if(al_key_down(&keyboard_state,ALLEGRO_KEY_D)) {
             joueur->direction = DROITE;
-            deplacerJoueur(joueur);
+            deplacerJoueur(joueur, carte);
         }
         else if(al_key_down(&keyboard_state,ALLEGRO_KEY_Q)) {
             joueur->direction = GAUCHE;
-            deplacerJoueur(joueur);
+            deplacerJoueur(joueur, carte);
         }
         else if(al_key_down(&keyboard_state,ALLEGRO_KEY_Z)) {
             joueur->direction = HAUT;
-            deplacerJoueur(joueur);
+            deplacerJoueur(joueur, carte);
         }
         else if(al_key_down(&keyboard_state,ALLEGRO_KEY_S)) {
             joueur->direction = BAS;
-            deplacerJoueur(joueur);
+            deplacerJoueur(joueur, carte);
         }
         else {
             joueur->direction = STATIQUE;
-            deplacerJoueur(joueur);
+            deplacerJoueur(joueur, carte);
         }
         frameTime+=16;
         if(frameTime>=600) {

@@ -19,6 +19,7 @@ Joueur* createJoueur() {
     joueur->direction = STATIQUE; //direction par défaut = statique
     joueur->sprite_x = 0.0f;
     joueur->sprite_y = 0.0f;
+    joueur->degats = 100;
 
     ALLEGRO_BITMAP *sprite_sheet = al_load_bitmap("../Assets/Cats/Characters/Character.png");
     if(!sprite_sheet) {
@@ -37,7 +38,6 @@ void destroyJoueur(Joueur* joueur) {
 
 
 void afficherJoueur(Joueur* joueur, int currentFrame) {
-    printf("%d\n", joueur->direction);
     switch(joueur->direction) {
         case DROITE :
             joueur->sprite_x = 2.0f;
@@ -69,10 +69,14 @@ void afficherJoueur(Joueur* joueur, int currentFrame) {
 }
 
 
-void deplacerJoueur(Joueur* joueur) {
+void deplacerJoueur(Joueur* joueur, Carte* carte) {
+    int next_x;
+    int next_y;
     switch (joueur->direction) {
         case DROITE :
-            if(joueur->x2 < WIDTH) {
+            next_x = (int)(joueur->x2+joueur->speed )/16;
+            next_y = (int)joueur->y2/16;
+            if(joueur->x2 < WIDTH && carte->map[next_y][next_x].marchable == true) {
                 joueur->x1 += joueur->speed;
                 joueur->x2 += joueur->speed;
             }
@@ -102,4 +106,28 @@ void deplacerJoueur(Joueur* joueur) {
         default : //direction par défaut = statique
             break;
     }
+}
+
+void action(Joueur* joueur, Carte* carte) {
+    int next_x = -1;
+    int next_y = -1;
+    switch (joueur->direction) {
+        case DROITE :
+            next_x = (int)(joueur->x2+joueur->speed )/16;
+            next_y = (int)joueur->y2/16;
+            if(carte->map[next_y][next_x].arbre != NULL) {
+
+                carte->map[next_y][next_x].arbre->pointsVie-=joueur->degats;
+
+            }
+            if (carte->map[next_y][next_x].arbre->pointsVie <= 0) {
+                carte->map[next_y][next_x].arbre = NULL;
+                carte->map[next_y][next_x].marchable = true;
+            }
+            break;
+        default:
+        break;
+    }
+
+
 }
