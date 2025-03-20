@@ -12,17 +12,22 @@
 
 typedef enum direction {
     DROITE, GAUCHE, HAUT, BAS, STATIQUE
-}Direction;
+}Deplacement;
+
+typedef enum regard {
+    RIGHT, LEFT, UP, DOWN
+}Watching;
 
 typedef struct j {
     float speed;
     float x1, y1;
     float x2, y2;
-    Direction direction;
+    Deplacement direction;
     ALLEGRO_BITMAP* image;
     float sprite_x;
     float sprite_y;
     int degats;
+    Watching regard;
 }Joueur;
 
 Joueur* createJoueur();

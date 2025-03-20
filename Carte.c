@@ -53,6 +53,8 @@ Carte *chargerCarte(int mapWidth, int mapHeight) {
 
     return carte;
 }
+
+
 void afficherArbre(Arbre *arbre, int pos_x, int pos_y) {
     al_draw_bitmap_region(arbre->image, 0, 0, 16, 32, pos_x * 16, (pos_y * 16) - 16, 0);
 }
@@ -63,7 +65,7 @@ void afficherCarte(Carte *carte) {
         for (int j = 0; j < carte->largeur; j++) {
             al_draw_bitmap(carte->map[i][j].image, j * 16, i * 16, 0);
             if (carte->map[i][j].arbre != NULL) {
-                afficherArbre(carte->map[i][j].arbre, i, j);
+                afficherArbre(carte->map[i][j].arbre, j, i); //Inversé
             }
         }
     }
