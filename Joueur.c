@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include "Joueur.h"
 
+#include "Objets.h"
+
+
 //quêtes + déplacements
 //==> animation : images
 //thème : forêt et eau
@@ -123,57 +126,30 @@ void deplacerJoueur(Joueur *joueur, Carte *carte) {
 void action(Joueur *joueur, Carte *carte) {
     int next_x = -1;
     int next_y = -1;
-    printf("(%f, %f)\t(%f, %f)\n ", joueur->x1, joueur->y1, joueur->x2, joueur->y2);
     switch (joueur->regard) {
         case RIGHT:
             next_x = (int) (joueur->x2 + joueur->speed) / 16;
             next_y = (int) joueur->y2 / 16;
-            if (carte->map[next_y][next_x].arbre != NULL) {
-                carte->map[next_y][next_x].arbre->pointsVie -= joueur->degats;
-            }
-            if (carte->map[next_y][next_x].arbre->pointsVie <= 0) {
-                carte->map[next_y][next_x].arbre = NULL;
-                carte->map[next_y][next_x].marchable = true;
-            }
             break;
 
         case LEFT:
             next_x = (int) (joueur->x2 - joueur->speed) / 16;
             next_y = (int) joueur->y2 / 16;
-            if (carte->map[next_y][next_x].arbre != NULL) {
-                carte->map[next_y][next_x].arbre->pointsVie -= joueur->degats;
-            }
-            if (carte->map[next_y][next_x].arbre->pointsVie <= 0) {
-                carte->map[next_y][next_x].arbre = NULL;
-                carte->map[next_y][next_x].marchable = true;
-            }
             break;
 
         case UP:
             next_x = (int) joueur->x2 / 16;
             next_y = (int) (joueur->y2 - joueur->speed) / 16;
-            if (carte->map[next_y][next_x].arbre != NULL) {
-                carte->map[next_y][next_x].arbre->pointsVie -= joueur->degats;
-            }
-            if (carte->map[next_y][next_x].arbre->pointsVie <= 0) {
-                carte->map[next_y][next_x].arbre = NULL;
-                carte->map[next_y][next_x].marchable = true;
-            }
             break;
 
         case DOWN:
             next_x = (int) joueur->x2 / 16;
             next_y = (int) (joueur->y2 + joueur->speed) / 16;
-            if (carte->map[next_y][next_x].arbre != NULL) {
-                carte->map[next_y][next_x].arbre->pointsVie -= joueur->degats;
-            }
-            if (carte->map[next_y][next_x].arbre->pointsVie <= 0) {
-                carte->map[next_y][next_x].arbre = NULL;
-                carte->map[next_y][next_x].marchable = true;
-            }
             break;
 
         default:
             break;
+
     }
+    taperArbre(carte, joueur, next_x, next_y);
 }

@@ -6,6 +6,8 @@
 
 #include <assert.h>
 
+#include "Objets.h"
+
 Carte *chargerCarte(int mapWidth, int mapHeight) {
     al_init_image_addon();
 
@@ -46,10 +48,7 @@ Carte *chargerCarte(int mapWidth, int mapHeight) {
     carte->largeur = mapWidth;
     carte->hauteur = mapHeight;
 
-    carte->map[10][10].arbre = malloc(1 * sizeof(Arbre));
-    carte->map[10][10].marchable = false;
-    carte->map[10][10].arbre->image = al_load_bitmap("../Assets/Cats/Objects/biome.png");
-    carte->map[10][10].arbre->pointsVie = 100;
+    ajouterArbres(carte);
 
     return carte;
 }
@@ -79,4 +78,20 @@ void destroyCarte(Carte *carte) {
     free(carte->map);
     free(carte);
     carte = NULL;
+}
+
+
+
+void ajouterArbres(Carte* carte) {
+    srand(time(NULL));
+
+    for(int i =0;i<carte->hauteur;i++) {
+        for(int j = 0;j<carte->largeur;j++) {
+            if (rand() % 50 < 1) {
+                carte->map[i][j].arbre = creerArbre();
+                carte->map[i][j].marchable = false;
+            }
+
+        }
+    }
 }

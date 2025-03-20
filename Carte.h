@@ -37,4 +37,6 @@ typedef struct carte {
 Carte* chargerCarte(int mapWidth, int mapHeight);
 void afficherCarte(Carte* carte);
 void destroyCarte(Carte* carte);
+
+void ajouterArbres(Carte* carte);
 #endif //CARTE_H
