@@ -20,6 +20,7 @@ typedef enum regard {
 
 typedef struct j {
     float speed;
+    float l,h;
     float x1, y1;
     float x2, y2;
     Deplacement direction;
@@ -27,6 +28,7 @@ typedef struct j {
     float sprite_x;
     float sprite_y;
     int degats;
+
     Watching regard;
 }Joueur;
 

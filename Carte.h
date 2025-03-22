@@ -13,6 +13,7 @@
 typedef struct arbre {
     int pointsVie;
     ALLEGRO_BITMAP* image;
+    int x, y;
 }Arbre;
 
 typedef enum type {

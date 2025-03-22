@@ -88,7 +88,7 @@ void ajouterArbres(Carte* carte) {
     for(int i =0;i<carte->hauteur;i++) {
         for(int j = 0;j<carte->largeur;j++) {
             if (rand() % 50 < 1) {
-                carte->map[i][j].arbre = creerArbre();
+                carte->map[i][j].arbre = creerArbre(i,j);
                 carte->map[i][j].marchable = false;
             }
 
