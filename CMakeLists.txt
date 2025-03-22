@@ -12,7 +12,9 @@ add_executable(Projet_ft__Supdepub main.c
         Carte.h
         Constantes.h
         Objets.c
-        Objets.h)
+        Objets.h
+        Inventaire.c
+        Inventaire.h)
 IF(WIN32)
     target_link_libraries(Projet_ft__Supdepub -lmingw32 -lallegro-5.0.10-monolith-md-debug)
 ELSE()

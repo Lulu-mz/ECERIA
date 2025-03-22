@@ -11,6 +11,8 @@ void installation() {
     al_install_keyboard();
     al_install_mouse();
     al_init_image_addon();
+    al_init_font_addon();
+    al_init_ttf_addon();
 }
 
 void registerEventSource(ALLEGRO_DISPLAY *display, ALLEGRO_TIMER *timer, ALLEGRO_EVENT_QUEUE *queue) {

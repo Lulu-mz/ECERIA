@@ -16,8 +16,8 @@
 
 Joueur *createJoueur() {
     Joueur *joueur = calloc(1, sizeof(Joueur));
-    joueur->l = 16.0f;
-    joueur->h = 16.0f;
+    joueur->l = 12.0f;
+    joueur->h = 12.0f;
     joueur->x1 = (float) WIDTH / 2; //faire démarer au milieu
     joueur->y1 = (float) HEIGHT / 2; //faire démarer au milieu
     joueur->x2 = joueur->x1 + joueur->l; //taille du personnage
@@ -28,6 +28,7 @@ Joueur *createJoueur() {
     joueur->sprite_x = 1.0f;
     joueur->sprite_y = 1.0f;
     joueur->degats = 100;
+    joueur->item = NULL;
 
     ALLEGRO_BITMAP *sprite_sheet = al_load_bitmap("../Assets/Cats/Characters/Character.png");
     if (!sprite_sheet) {
@@ -74,9 +75,13 @@ void afficherJoueur(Joueur *joueur, int currentFrame) {
             break;
     }
     al_draw_rectangle(joueur->x1,joueur->y1,joueur->x2,joueur->y2,al_map_rgba(255,0,0,50),2);
-
-    al_draw_bitmap_region(joueur->image, (joueur->sprite_x + (currentFrame*3)) * 16, joueur->sprite_y * 16, 16, 16,
-                          joueur->x1, joueur->y1, 0);
+    int imageL = 16;
+    int imageH = 16;
+    al_draw_bitmap_region(joueur->image, (joueur->sprite_x + (currentFrame*3)) * 16, joueur->sprite_y * 16, imageL, imageH,
+                          (joueur->x1)-((imageL-joueur->l)/2), (joueur->y1)-((imageH-joueur->h)/2), 0);
+    if (joueur->item != NULL) {
+        afficherBois(joueur->item);
+    }
 
 }
 
@@ -130,6 +135,19 @@ void deplacerJoueur(Joueur *joueur, Carte *carte) {
     }
 }
 
+void ajouterBois(Joueur* joueur, int n) {
+    if(joueur->item == NULL) {
+        joueur->item = creerBois();
+    }
+    if(joueur->item->nbMax - joueur->item->nb >= n){
+        joueur->item->nb += n;
+    }
+    else if (joueur->item->nbMax - joueur->item->nb < n) {
+        joueur->item->nb = joueur->item->nbMax;
+    }
+
+}
+
 void action(Joueur *joueur, Carte *carte) {
     int next_x = -1; //pour le joueur
     int next_y = -1; //pour le joueur
@@ -170,3 +188,4 @@ void action(Joueur *joueur, Carte *carte) {
     }
     taperArbre(carte, joueur, next_x, next_y, next_x2, next_y2);
 }
+
