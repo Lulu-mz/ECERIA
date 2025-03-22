@@ -23,8 +23,13 @@ Item* creerBois() {
 void afficherBois(Item* item) {
     char buffer[10];
     sprintf(buffer, "%d", item->nb);
-    al_draw_bitmap_region(item->image, 16, 16, 16, 16, 0, 0, 0);
+    al_draw_scaled_bitmap(item->image, 16, 16, 16, 16, 0, 0, 32, 32, 0);
+    al_draw_text(item->font, al_map_rgb(0,0,0), 12, 10 , 0, buffer);
+    al_draw_text(item->font, al_map_rgb(0,0,0), 8, 10 , 0, buffer);
+    al_draw_text(item->font, al_map_rgb(0,0,0), 10, 12 , 0, buffer);
+    al_draw_text(item->font, al_map_rgb(0,0,0), 10, 8 , 0, buffer);
     al_draw_text(item->font, al_map_rgb(255, 255, 255), 10, 10 , 0, buffer);
+
 }
 
 void destroyBois(Item* item) {
