@@ -135,15 +135,15 @@ void deplacerJoueur(Joueur *joueur, Carte *carte) {
     }
 }
 
-void ajouterBois(Joueur* joueur, int n) {
-    if(joueur->item == NULL) {
-        joueur->item = creerBois();
+void ajouterBois(Item* item, int n) {
+    if(item == NULL) {
+        item = creerBois();
     }
-    if(joueur->item->nbMax - joueur->item->nb >= n){
-        joueur->item->nb += n;
+    if(item->nbMax - item->nb >= n){
+        item->nb += n;
     }
-    else if (joueur->item->nbMax - joueur->item->nb < n) {
-        joueur->item->nb = joueur->item->nbMax;
+    else if (item->nbMax - item->nb < n) {
+        item->nb = item->nbMax;
     }
 
 }

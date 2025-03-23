@@ -20,6 +20,11 @@ typedef struct item {
     ALLEGRO_FONT* font;
 }Item;
 
+typedef struct inventaire {
+    Item** items;
+    int taille;
+}Inventaire;
+
 Item* creerBois();
 void afficherBois(Item* item);
 
