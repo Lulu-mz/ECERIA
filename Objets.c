@@ -43,7 +43,7 @@ Item* taperArbre(Carte* carte, Joueur* joueur, int x, int y, int x2, int y2) {
             }
         }
     }
-    Item * to_add = creerBois();
+    Item * to_add = creerItem(PIERRE);
     to_add->nb = nb_bois;
     return to_add;
 }

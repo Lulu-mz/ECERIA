@@ -9,7 +9,7 @@
 
 
 typedef enum typeItem {
-    BOIS,
+    BOIS, PIERRE
 }TypeItem;
 
 typedef struct item {
@@ -18,6 +18,7 @@ typedef struct item {
     TypeItem type;
     ALLEGRO_BITMAP* image;
     ALLEGRO_FONT* font;
+    int sx, sy;
 }Item;
 
 typedef struct inventaire {
@@ -25,11 +26,11 @@ typedef struct inventaire {
     int taille;
 }Inventaire;
 
-Item* creerBois();
-void destroyBois(Item* item);
+void destroyItem(Item* item);
 void afficherItem(Item* item,int i);
 Inventaire* creerInventaire();
 void afficherInventaire(Inventaire* inv);
 void ajouterItem(Inventaire* inv, Item* item);
-
+Item* ajouter_n_item(Item* item, int n, TypeItem type);
+Item *creerItem(TypeItem type);
 #endif //INVENTAIRE_H

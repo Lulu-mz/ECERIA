@@ -11,14 +11,24 @@
 
 #include "Joueur.h"
 
-
-Item *creerBois() {
+Item *creerItem(TypeItem type) {
     Item *item = malloc(1 * sizeof(Item));
-    item->type = BOIS;
+    item->type = type;
     item->nb = 0;
     item->nbMax = 100;
     item->image = al_load_bitmap("../Assets/Cats/Objects/items.png");
     item->font = al_load_ttf_font("../Assets/Arial.ttf", 20, 0);
+    switch(item->type) {
+        case BOIS :
+            item->sx = 16;
+            item->sy = 16;
+        break;
+
+        case PIERRE :
+            item->sx = 0;
+            item->sy = 16;
+        break;
+    }
     return item;
 }
 
@@ -26,7 +36,7 @@ void afficherItem(Item *item, int i) {
     char buffer[10];
     sprintf(buffer, "%d", item->nb);
     int decalage = i * 48;
-    al_draw_scaled_bitmap(item->image, 16, 16, 16, 16, decalage, 0, 32, 32, 0);
+    al_draw_scaled_bitmap(item->image, item->sx, item->sy, 16, 16, decalage, 0, 32, 32, 0);
     al_draw_text(item->font, al_map_rgb(0, 0, 0), 12 + decalage, 10, 0, buffer);
     al_draw_text(item->font, al_map_rgb(0, 0, 0), 8 + decalage, 10, 0, buffer);
     al_draw_text(item->font, al_map_rgb(0, 0, 0), 10 + decalage, 12, 0, buffer);
@@ -34,9 +44,21 @@ void afficherItem(Item *item, int i) {
     al_draw_text(item->font, al_map_rgb(255, 255, 255), 10 + decalage, 10, 0, buffer);
 }
 
-void destroyBois(Item *item) {
+void destroyItem(Item *item) {
     free(item);
     item = NULL;
+}
+
+Item* ajouter_n_item(Item *item, int n, TypeItem type) {
+    if (item == NULL) {
+        item = creerItem(type);
+    }
+    if (item->nbMax - item->nb >= n) {
+        item->nb += n;
+    } else if (item->nbMax - item->nb < n) {
+        item->nb = item->nbMax;
+    }
+    return item;
 }
 
 int find(Inventaire *inventaire) {
@@ -72,12 +94,12 @@ void ajouterItem(Inventaire *inv, Item *item) {
     int reste = 0;
     if (pos != -1) {
         reste = inv->items[pos]->nb + item->nb - item->nbMax;
-        ajouterBois(inv->items[pos], item->nb);
+        ajouter_n_item(inv->items[pos], item->nb, item->type);
     } else {
         pos = find(inv);
         if (pos != -1) {
             reste = item->nb - item->nbMax;
-            inv->items[pos] = ajouterBois(inv->items[pos], item->nb);
+            inv->items[pos] = ajouter_n_item(inv->items[pos], item->nb, item->type);
         }
     }
 
@@ -90,9 +112,7 @@ void ajouterItem(Inventaire *inv, Item *item) {
 void afficherInventaire(Inventaire *inventaire) {
     for (int i = 0; i < inventaire->taille; i++) {
         if (inventaire->items[i] != NULL) {
-            if (inventaire->items[i]->type == BOIS) {
                 afficherItem(inventaire->items[i], i);
-            }
         }
     }
 }

@@ -137,17 +137,6 @@ void deplacerJoueur(Joueur *joueur, Carte *carte) {
             break;
     }
 }
-Item* ajouterBois(Item *item, int n) {
-    if (item == NULL) {
-        item = creerBois();
-    }
-    if (item->nbMax - item->nb >= n) {
-        item->nb += n;
-    } else if (item->nbMax - item->nb < n) {
-        item->nb = item->nbMax;
-    }
-    return item;
-}
 
 void action(Joueur *joueur, Carte *carte) {
     int next_x = -1; //pour le joueur
@@ -188,5 +177,5 @@ void action(Joueur *joueur, Carte *carte) {
     }
     Item *i = taperArbre(carte, joueur, next_x, next_y, next_x2, next_y2);
     ajouterItem(joueur->inventaire, i);
-    destroyBois(i);
+    destroyItem(i);
 }

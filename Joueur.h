@@ -38,5 +38,5 @@ void destroyJoueur(Joueur* joueur);
 void afficherJoueur(Joueur* joueur, int curentFrame);
 void deplacerJoueur(Joueur* joueur, Carte* carte);
 void action(Joueur* joueur, Carte* carte);
-Item* ajouterBois(Item* item, int n);
+
 #endif //JOUEUR_H
