@@ -9,6 +9,6 @@
 
 Arbre* creerArbre(int x, int y);
 
-void taperArbre(Carte* carte, Joueur* joueur, int x, int y, int x2, int y2);
+Item* taperArbre(Carte* carte, Joueur* joueur, int x, int y, int x2, int y2);
 
 #endif //OBJETS_H

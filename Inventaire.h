@@ -26,6 +26,10 @@ typedef struct inventaire {
 }Inventaire;
 
 Item* creerBois();
-void afficherBois(Item* item);
+void destroyBois(Item* item);
+void afficherItem(Item* item,int i);
+Inventaire* creerInventaire();
+void afficherInventaire(Inventaire* inv);
+void ajouterItem(Inventaire* inv, Item* item);
 
 #endif //INVENTAIRE_H

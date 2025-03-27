@@ -28,7 +28,7 @@ Joueur *createJoueur() {
     joueur->sprite_x = 1.0f;
     joueur->sprite_y = 1.0f;
     joueur->degats = 100;
-    joueur->item = NULL;
+    joueur->inventaire = creerInventaire();
 
     ALLEGRO_BITMAP *sprite_sheet = al_load_bitmap("../Assets/Cats/Characters/Character.png");
     if (!sprite_sheet) {
@@ -74,15 +74,14 @@ void afficherJoueur(Joueur *joueur, int currentFrame) {
             }
             break;
     }
-    al_draw_rectangle(joueur->x1,joueur->y1,joueur->x2,joueur->y2,al_map_rgba(255,0,0,50),2);
+    al_draw_rectangle(joueur->x1, joueur->y1, joueur->x2, joueur->y2, al_map_rgba(255, 0, 0, 50), 2);
     int imageL = 16;
     int imageH = 16;
-    al_draw_bitmap_region(joueur->image, (joueur->sprite_x + (currentFrame*3)) * 16, joueur->sprite_y * 16, imageL, imageH,
-                          (joueur->x1)-((imageL-joueur->l)/2), (joueur->y1)-((imageH-joueur->h)/2), 0);
-    if (joueur->item != NULL) {
-        afficherBois(joueur->item);
-    }
+    al_draw_bitmap_region(joueur->image, (joueur->sprite_x + (currentFrame * 3)) * 16, joueur->sprite_y * 16, imageL,
+                          imageH,
+                          (joueur->x1) - ((imageL - joueur->l) / 2), (joueur->y1) - ((imageH - joueur->h) / 2), 0);
 
+    afficherInventaire(joueur->inventaire);
 }
 
 
@@ -94,7 +93,8 @@ void deplacerJoueur(Joueur *joueur, Carte *carte) {
             next_x = (int) (joueur->x2 + joueur->speed) / 16;
             next_y = (int) joueur->y2 / 16;
             joueur->regard = RIGHT;
-            if (joueur->x2 < WIDTH && carte->map[next_y][next_x].marchable == true && carte->map[(int)joueur->y1 /16][next_x].marchable == true) {
+            if (joueur->x2 < WIDTH && carte->map[next_y][next_x].marchable == true && carte->map[(int) joueur->y1 / 16][
+                    next_x].marchable == true) {
                 joueur->x1 += joueur->speed;
                 joueur->x2 += joueur->speed;
             }
@@ -104,7 +104,8 @@ void deplacerJoueur(Joueur *joueur, Carte *carte) {
             next_x = (int) (joueur->x1 - joueur->speed) / 16;
             next_y = (int) joueur->y1 / 16;
             joueur->regard = LEFT;
-            if (joueur->x1 > 0.0f && carte->map[next_y][next_x].marchable == true && carte->map[(int)joueur->y2 /16][next_x].marchable == true) {
+            if (joueur->x1 > 0.0f && carte->map[next_y][next_x].marchable == true && carte->map[(int) joueur->y2 / 16][
+                    next_x].marchable == true) {
                 joueur->x1 -= joueur->speed;
                 joueur->x2 -= joueur->speed;
             }
@@ -114,7 +115,8 @@ void deplacerJoueur(Joueur *joueur, Carte *carte) {
             next_x = (int) joueur->x1 / 16;
             next_y = (int) (joueur->y1 - joueur->speed) / 16;
             joueur->regard = UP;
-            if (joueur->y1 > 0.0f && carte->map[next_y][next_x].marchable == true && carte->map[next_y][(int)joueur->x2 / 16].marchable == true) {
+            if (joueur->y1 > 0.0f && carte->map[next_y][next_x].marchable == true && carte->map[next_y][
+                    (int) joueur->x2 / 16].marchable == true) {
                 joueur->y1 -= joueur->speed;
                 joueur->y2 -= joueur->speed;
             }
@@ -124,7 +126,8 @@ void deplacerJoueur(Joueur *joueur, Carte *carte) {
             next_x = (int) joueur->x2 / 16;
             next_y = (int) (joueur->y2 + joueur->speed) / 16;
             joueur->regard = DOWN;
-            if (joueur->y2 < HEIGHT && carte->map[next_y][next_x].marchable == true && carte->map[next_y][(int)joueur->x1 / 16].marchable == true) {
+            if (joueur->y2 < HEIGHT && carte->map[next_y][next_x].marchable == true && carte->map[next_y][
+                    (int) joueur->x1 / 16].marchable == true) {
                 joueur->y1 += joueur->speed;
                 joueur->y2 += joueur->speed;
             }
@@ -134,18 +137,16 @@ void deplacerJoueur(Joueur *joueur, Carte *carte) {
             break;
     }
 }
-
-void ajouterBois(Item* item, int n) {
-    if(item == NULL) {
+Item* ajouterBois(Item *item, int n) {
+    if (item == NULL) {
         item = creerBois();
     }
-    if(item->nbMax - item->nb >= n){
+    if (item->nbMax - item->nb >= n) {
         item->nb += n;
-    }
-    else if (item->nbMax - item->nb < n) {
+    } else if (item->nbMax - item->nb < n) {
         item->nb = item->nbMax;
     }
-
+    return item;
 }
 
 void action(Joueur *joueur, Carte *carte) {
@@ -157,35 +158,35 @@ void action(Joueur *joueur, Carte *carte) {
         case RIGHT:
             next_x = (int) (joueur->x2 + joueur->speed) / 16; //on regarde la prochaine case où on va (joueur)
             next_y = (int) joueur->y2 / 16;
-            next_y2 = (int) joueur->y1 /16;
+            next_y2 = (int) joueur->y1 / 16;
             next_x2 = next_x;
             break;
 
         case LEFT:
             next_x = (int) (joueur->x1 - joueur->speed) / 16;
             next_y = (int) joueur->y1 / 16;
-            next_y2 = (int) joueur->y2 /16;
+            next_y2 = (int) joueur->y2 / 16;
             next_x2 = next_x;
             break;
 
         case UP:
             next_x = (int) joueur->x1 / 16;
             next_y = (int) (joueur->y1 - joueur->speed) / 16;
-            next_x2 = (int) joueur->x2 /16;
+            next_x2 = (int) joueur->x2 / 16;
             next_y2 = next_y;
             break;
 
         case DOWN:
             next_x = (int) joueur->x2 / 16;
             next_y = (int) (joueur->y2 + joueur->speed) / 16;
-            next_x2 = (int) joueur->x1 /16;
+            next_x2 = (int) joueur->x1 / 16;
             next_y2 = next_y;
             break;
 
         default:
             break;
-
     }
-    taperArbre(carte, joueur, next_x, next_y, next_x2, next_y2);
+    Item *i = taperArbre(carte, joueur, next_x, next_y, next_x2, next_y2);
+    ajouterItem(joueur->inventaire, i);
+    destroyBois(i);
 }
-
