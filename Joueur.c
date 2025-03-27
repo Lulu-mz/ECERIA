@@ -39,8 +39,8 @@ Joueur *createJoueur() {
     return joueur;
 }
 
-
 void destroyJoueur(Joueur *joueur) {
+    destroyInventaire(joueur->inventaire);
     free(joueur);
     joueur = NULL;
 }

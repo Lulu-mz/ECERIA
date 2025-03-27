@@ -117,12 +117,12 @@ void afficherInventaire(Inventaire *inventaire) {
     }
 }
 
-// Quand je récupère du bois :
+//TODO : à corriger destroyInventaire()
+void destroyInventaire(Inventaire* inv) {
+    for(int i = 0; i< inv->taille; i++) {
+        destroyItem(inv->items[i]);
+    }
+    free(inv);
+    inv = NULL;
+}
 
-//  Je recherche SI j'ai déjà du bois dans l'inventaire.
-// Si j'ai déjà du bois, alors j'ajoute le nouveau nombre
-// Si le bois est plein et qu'il me reste du bois a mettre dans l'inventaire, je continue ma recherche
-
-
-// Je regarde si j'ai de la place dans l'inventaire
-// Si j'ai de la place, j'ajoute le bois

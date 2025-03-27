@@ -27,6 +27,7 @@ typedef struct inventaire {
 }Inventaire;
 
 void destroyItem(Item* item);
+void destroyInventaire(Inventaire* inv);
 void afficherItem(Item* item,int i);
 Inventaire* creerInventaire();
 void afficherInventaire(Inventaire* inv);
