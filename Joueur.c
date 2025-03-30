@@ -6,7 +6,7 @@
 
 #include <allegro5/allegro_primitives.h>
 
-#include "Objets.h"
+#include "Biome.h"
 
 
 //quêtes + déplacements
@@ -175,7 +175,7 @@ void action(Joueur *joueur, Carte *carte) {
         default:
             break;
     }
-    Item *i = taperArbre(carte, joueur, next_x, next_y, next_x2, next_y2);
+    Item *i = taperGrassLand(carte, joueur, next_x, next_y, next_x2, next_y2);
     ajouterItem(joueur->inventaire, i);
     destroyItem(i);
 }

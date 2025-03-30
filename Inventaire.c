@@ -90,6 +90,9 @@ Inventaire *creerInventaire() {
 }
 
 void ajouterItem(Inventaire *inv, Item *item) {
+    if(item == NULL || item->nb == 0) {
+        return;
+    }
     int pos = findItem(inv, item->type);
     int reste = 0;
     if (pos != -1) {

@@ -10,11 +10,12 @@
 #include <allegro5/bitmap_io.h>
 #include <allegro5/bitmap_draw.h>
 #include <allegro5/allegro_image.h>
-typedef struct arbre {
-    int pointsVie;
-    ALLEGRO_BITMAP* image;
-    int x, y;
-}Arbre;
+
+#include "Biome.h"
+
+
+//TODO : faire une structure image
+
 
 typedef enum type {
     HERBE,
@@ -26,7 +27,7 @@ typedef struct c {
     Type typeCase;
     ALLEGRO_BITMAP* image;
     bool marchable;
-    Arbre* arbre;
+    GrassLand* grassLand;
 }Case;
 
 typedef struct carte {
@@ -38,6 +39,5 @@ typedef struct carte {
 Carte* chargerCarte(int mapWidth, int mapHeight);
 void afficherCarte(Carte* carte);
 void destroyCarte(Carte* carte);
-
-void ajouterArbres(Carte* carte);
+void ajouterGrassLand(Carte* carte);
 #endif //CARTE_H

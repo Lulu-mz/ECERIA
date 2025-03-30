@@ -11,8 +11,8 @@ add_executable(Projet_ft__Supdepub main.c
         Carte.c
         Carte.h
         Constantes.h
-        Objets.c
-        Objets.h
+        Biome.c
+        Biome.h
         Inventaire.c
         Inventaire.h)
 IF(WIN32)

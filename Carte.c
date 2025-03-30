@@ -5,8 +5,8 @@
 #include "Carte.h"
 
 #include <assert.h>
-
-#include "Objets.h"
+#include "Inventaire.h"
+#include "Joueur.h"
 
 Carte *chargerCarte(int mapWidth, int mapHeight) {
     al_init_image_addon();
@@ -33,7 +33,7 @@ Carte *chargerCarte(int mapWidth, int mapHeight) {
             carte->map[i][j].marchable = true;
             carte->map[i][j].typeCase = HERBE;
             carte->map[i][j].image = herbe;
-            carte->map[i][j].arbre = NULL;
+            carte->map[i][j].grassLand = NULL;
             if (rand() % 15 < 1) {
                 //une chance sur 15 = 6,6%
                 carte->map[i][j].typeCase = FLEUR;
@@ -48,23 +48,21 @@ Carte *chargerCarte(int mapWidth, int mapHeight) {
     carte->largeur = mapWidth;
     carte->hauteur = mapHeight;
 
-    ajouterArbres(carte);
+    ajouterGrassLand(carte);
 
     return carte;
 }
 
 
-void afficherArbre(Arbre *arbre, int pos_x, int pos_y) {
-    al_draw_bitmap_region(arbre->image, 0, 0, 16, 32, pos_x * 16, (pos_y * 16) - 16, 0);
-}
+
 
 
 void afficherCarte(Carte *carte) {
     for (int i = 0; i < carte->hauteur; i++) {
         for (int j = 0; j < carte->largeur; j++) {
             al_draw_bitmap(carte->map[i][j].image, j * 16, i * 16, 0);
-            if (carte->map[i][j].arbre != NULL) {
-                afficherArbre(carte->map[i][j].arbre, j, i); //Inversé
+            if (carte->map[i][j].grassLand != NULL) {
+                afficherGrassLand(carte->map[i][j].grassLand, j, i); //Inversé
             }
         }
     }
@@ -82,16 +80,51 @@ void destroyCarte(Carte *carte) {
 
 
 
-void ajouterArbres(Carte* carte) {
+void ajouterGrassLand(Carte* carte) {
     srand(time(NULL));
-
+    GrassLandType type = 0;
     for(int i =0;i<carte->hauteur;i++) {
         for(int j = 0;j<carte->largeur;j++) {
             if (rand() % 50 < 1) {
-                carte->map[i][j].arbre = creerArbre(i,j);
+                type = rand()%2;
+                carte->map[i][j].grassLand = creerGrassLand(i,j, type);
                 carte->map[i][j].marchable = false;
             }
 
         }
     }
+}
+
+//TODO : call twice instead of array
+Item* taperGrassLand(Carte* carte, Joueur* joueur, int x, int y, int x2, int y2) {
+    int aimedCase = 1;
+    int nb_items = 0;
+    TypeItem type_item = BOIS;
+    GrassLand* grass_lands[2];
+    grass_lands[0] = carte->map[y][x].grassLand;
+    if (x!=x2 || y !=y2) {
+        grass_lands[1] = carte->map[y2][x2].grassLand;
+        aimedCase = 2;
+    }
+    for(int i = 0; i<aimedCase; i++) {
+        if (grass_lands[i]!=NULL) {
+            //on regarde si y'a un gl
+            grass_lands[i]->pointsVie -= joueur->degats;
+            type_item = grass_lands[i]->type;
+            //bois (item) = type grass_land: arbre
+            //pierre (item) = type grass_land: rocher
+            nb_items+=5;
+            if (grass_lands[i]->pointsVie <= 0) {
+                nb_items+=10;
+                carte->map[grass_lands[i]->x][grass_lands[i]->y].marchable = true;
+                carte->map[grass_lands[i]->x][grass_lands[i]->y].grassLand = NULL;
+                destroyGrassLand(grass_lands[i]);
+                grass_lands[i] = NULL;
+
+            }
+        }
+    }
+    Item * to_add = creerItem(type_item);
+    to_add->nb = nb_items;
+    return to_add;
 }
