@@ -117,7 +117,6 @@ void afficherInventaire(Inventaire *inventaire) {
     }
 }
 
-//TODO : à corriger destroyInventaire()
 void destroyInventaire(Inventaire* inv) {
     for(int i = 0; i< inv->taille; i++) {
         destroyItem(inv->items[i]);
