@@ -28,6 +28,7 @@ typedef struct c {
     ALLEGRO_BITMAP* image;
     bool marchable;
     GrassLand* grassLand;
+    int size;
 }Case;
 
 typedef struct carte {
@@ -39,5 +40,7 @@ typedef struct carte {
 Carte* chargerCarte(int mapWidth, int mapHeight);
 void afficherCarte(Carte* carte);
 void destroyCarte(Carte* carte);
-void ajouterGrassLand(Carte* carte);
+void chargerGrassLand(Carte* carte);
+Carte* creerCarte(int w, int h);
+int saveCarte(Carte* carte);
 #endif //CARTE_H

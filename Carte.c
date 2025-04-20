@@ -5,16 +5,21 @@
 #include "Carte.h"
 
 #include <assert.h>
+#include <allegro5/allegro_primitives.h>
+
 #include "Inventaire.h"
 #include "Joueur.h"
 
 Carte *chargerCarte(int mapWidth, int mapHeight) {
     al_init_image_addon();
 
-    srand(time(NULL));
+    FILE *fichier = fopen("../Save/map.txt", "r");
+    if (!fichier) {
+        perror("Erreur ouverture fichier map.txt");
+        exit(EXIT_FAILURE);
+    }
 
-    Carte *carte = malloc(1 * sizeof(Carte));
-
+    Carte *carte = malloc(sizeof(Carte));
     carte->map = malloc(mapHeight * sizeof(Case *));
     for (int i = 0; i < mapHeight; i++) {
         carte->map[i] = malloc(mapWidth * sizeof(Case));
@@ -30,37 +35,154 @@ Carte *chargerCarte(int mapWidth, int mapHeight) {
 
     for (int i = 0; i < mapHeight; i++) {
         for (int j = 0; j < mapWidth; j++) {
-            carte->map[i][j].marchable = true;
-            carte->map[i][j].typeCase = HERBE;
-            carte->map[i][j].image = herbe;
-            carte->map[i][j].grassLand = NULL;
-            if (rand() % 15 < 1) {
-                //une chance sur 15 = 6,6%
-                carte->map[i][j].typeCase = FLEUR;
-                carte->map[i][j].image = fleur;
-            } else if (rand() % 10 < 2) {
-                //une chance sur 10 = 10%
-                carte->map[i][j].typeCase = HERBE2;
-                carte->map[i][j].image = herbe2;
+            int valeur = 0;
+            if (fscanf(fichier, "%d", &valeur) != 1) {
+                printf("Erreur de lecture dans map.txt à la position (%d, %d)\n", i, j);
+                fclose(fichier);
+                exit(EXIT_FAILURE);
             }
-        } //sinon herbe normale
+
+            carte->map[i][j].grassLand = NULL;
+            carte->map[i][j].size = TILE_SIZE;
+            carte->map[i][j].marchable = true;
+
+            switch (valeur) {
+                case 0:
+                    carte->map[i][j].typeCase = HERBE;
+                    carte->map[i][j].image = herbe;
+                    break;
+                case 1:
+                    carte->map[i][j].typeCase = HERBE2;
+                    carte->map[i][j].image = herbe2;
+                    break;
+                case 2:
+                    carte->map[i][j].typeCase = FLEUR;
+                    carte->map[i][j].image = fleur;
+                    break;
+                default:
+                    printf("Valeur inconnue %d dans map.txt à la position (%d, %d)\n", valeur, i, j);
+                    fclose(fichier);
+                    exit(EXIT_FAILURE);
+            }
+        }
     }
+
+    fclose(fichier);
     carte->largeur = mapWidth;
     carte->hauteur = mapHeight;
 
-    ajouterGrassLand(carte);
+    chargerGrassLand(carte);
+
+    return carte;
+}
+
+Carte* creerCarte(int w, int h) {
+    Carte *carte = malloc(sizeof(Carte));
+    carte->map = malloc(h * sizeof(Case *));
+    for (int i = 0; i < h; i++) {
+        carte->map[i] = malloc(w * sizeof(Case));
+    }
+
+    srand(time(NULL));
+
+    ALLEGRO_BITMAP *herbe = al_load_bitmap("../Assets/Tiles/tile_0000.png");
+    ALLEGRO_BITMAP *herbe2 = al_load_bitmap("../Assets/Tiles/tile_0001.png");
+    ALLEGRO_BITMAP *fleur = al_load_bitmap("../Assets/Tiles/tile_0002.png");
+    if (!herbe || !herbe2 || !fleur) {
+        printf("Erreur de chargement de l'image\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            int valeur = rand()%3; //génère 0, 1 ou 2
+
+            carte->map[i][j].grassLand = NULL;
+            carte->map[i][j].size = TILE_SIZE;
+            carte->map[i][j].marchable = true;
+
+            switch (valeur) {
+                case 0:
+                    carte->map[i][j].typeCase = HERBE;
+                    carte->map[i][j].image = herbe;
+                break;
+                case 1:
+                    carte->map[i][j].typeCase = HERBE2;
+                carte->map[i][j].image = herbe2;
+                break;
+                case 2:
+                    carte->map[i][j].typeCase = FLEUR;
+                carte->map[i][j].image = fleur;
+                break;
+                default:
+                    printf("Valeur inconnue %d dans map.txt à la position (%d, %d)\n", valeur, i, j);
+                exit(EXIT_FAILURE);
+            }
+            valeur = -1; //par défaut : rien
+            // 1 chance sur 50 d'avoir un grassland
+            if (rand() % 50 < 1) {
+                valeur = rand() % 2; // 0 ou 1
+            }
+            if (valeur == 0) {
+                carte->map[i][j].grassLand = creerGrassLand(i, j, ARBRE);
+                carte->map[i][j].marchable = false;
+            } else if (valeur == 1) {
+                carte->map[i][j].grassLand = creerGrassLand(i, j, ROCHER);
+                carte->map[i][j].marchable = false;
+            } else {
+                carte->map[i][j].grassLand = NULL;
+            }
+        }
+    }
+
+    carte->largeur = w;
+    carte->hauteur = h;
 
     return carte;
 }
 
 
+int saveCarte(Carte* carte) {
+    FILE *mapFile = fopen("../Save/map.txt", "w");
+    FILE *grassLandFile = fopen("../Save/biome.txt", "w");
+    if (mapFile == NULL|| grassLandFile == NULL){
+        perror("Erreur lors de l'ouverture du fichier");
+        return 1;
+    }
 
+    for (int i = 0; i < carte->hauteur; i++) {
+        for (int j = 0; j < carte->largeur; j++) {
+            int type = carte->map[i][j].typeCase;
+            fprintf(mapFile, "%d", type);
+
+            int glType = -1; //il n'y a pas de grassLand
+            if(carte->map[i][j].grassLand != NULL) { //égal à null par défaut => pas de grassLand
+                glType = carte->map[i][j].grassLand->type;
+            }
+            fprintf(grassLandFile, "%d", glType);
+
+            if (j < carte->largeur - 1){
+                fprintf(mapFile, " "); // espace entre les colonnes
+                fprintf(grassLandFile, " "); // espace entre les colonnes
+                }
+        }
+        fprintf(mapFile, "\n"); // saut de ligne à la fin de chaque ligne
+        fprintf(grassLandFile, "\n"); // saut de ligne à la fin de chaque ligne
+    }
+
+    fclose(mapFile);
+    fclose(grassLandFile);
+    return 0;
+}
 
 
 void afficherCarte(Carte *carte) {
     for (int i = 0; i < carte->hauteur; i++) {
         for (int j = 0; j < carte->largeur; j++) {
-            al_draw_bitmap(carte->map[i][j].image, j * 16, i * 16, 0);
+            // al_draw_bitmap(carte->map[i][j].image, j * 16, i * 16, 0);
+            int imageL=16,imageH=16;
+            al_draw_rectangle(j*32,i*32,j*32+32,i*32+32,al_map_rgb(0,0,0),2 );
+            al_draw_scaled_bitmap(carte->map[i][j].image,0,0,imageL,imageH, j * carte->map[i][j].size, i * carte->map[i][j].size,carte->map[i][j].size,carte->map[i][j].size, 0);
             if (carte->map[i][j].grassLand != NULL) {
                 afficherGrassLand(carte->map[i][j].grassLand, j, i); //Inversé
             }
@@ -79,21 +201,38 @@ void destroyCarte(Carte *carte) {
 }
 
 
+void chargerGrassLand(Carte* carte) {
+    FILE *fichier = fopen("../Save/biome.txt", "r");
+    if (!fichier) {
+        perror("Erreur ouverture fichier biome.txt");
+        exit(EXIT_FAILURE);
+    }
 
-void ajouterGrassLand(Carte* carte) {
-    srand(time(NULL));
-    GrassLandType type = 0;
-    for(int i =0;i<carte->hauteur;i++) {
-        for(int j = 0;j<carte->largeur;j++) {
-            if (rand() % 50 < 1) {
-                type = rand()%2;
-                carte->map[i][j].grassLand = creerGrassLand(i,j, type);
-                carte->map[i][j].marchable = false;
+    for (int i = 0; i < carte->hauteur; i++) {
+        for (int j = 0; j < carte->largeur; j++) {
+            int valeur = -1;
+            if (fscanf(fichier, "%d", &valeur) != 1) {
+                printf("Erreur de lecture biome.txt à (%d, %d)\n", i, j);
+                fclose(fichier);
+                exit(EXIT_FAILURE);
             }
 
+            if (valeur == 0) {
+                carte->map[i][j].grassLand = creerGrassLand(i, j, ARBRE);
+                carte->map[i][j].marchable = false;
+            } else if (valeur == 1) {
+                carte->map[i][j].grassLand = creerGrassLand(i, j, ROCHER);
+                carte->map[i][j].marchable = false;
+            } else {
+                carte->map[i][j].grassLand = NULL;
+            }
         }
     }
+
+    fclose(fichier);
 }
+
+
 
 //TODO : call twice instead of array
 Item* taperGrassLand(Carte* carte, Joueur* joueur, int x, int y, int x2, int y2) {

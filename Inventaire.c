@@ -89,6 +89,44 @@ Inventaire *creerInventaire() {
     return inv;
 }
 
+
+void saveInventaire(Inventaire* inv) {
+    FILE *invFile = fopen("../Save/inventaire.txt", "w");
+    if (invFile == NULL){
+        perror("Erreur lors de l'ouverture du fichier");
+        return;
+    }
+    for(int i = 0; i < inv->taille; i++) {
+        if(inv->items[i] == NULL) {
+            fprintf(invFile, "%d %d\n", -1, 0); //type puis quantité
+        }
+        else {
+            fprintf(invFile, "%d %d\n", inv->items[i]->type, inv->items[i]->nb);
+        }
+    }
+}
+
+
+Inventaire* chargerInventaire() {
+    FILE *invFile = fopen("../Save/inventaire.txt", "r");
+    if (invFile == NULL){
+        perror("Erreur lors de l'ouverture du fichier");
+        return NULL;
+    }
+    Inventaire* inv = creerInventaire();
+    for(int i = 0; i < inv->taille; i++) {
+        int type;
+        int qty;
+        fscanf(invFile, "%d %d", &type, &qty);
+        if(type != -1) {
+            inv->items[i] = creerItem(type);
+            inv->items[i]->nb = qty;
+        }
+    }
+    return inv;
+}
+
+
 void ajouterItem(Inventaire *inv, Item *item) {
     if(item == NULL || item->nb == 0) {
         return;

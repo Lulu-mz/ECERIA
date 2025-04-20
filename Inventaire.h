@@ -29,7 +29,11 @@ typedef struct inventaire {
 void destroyItem(Item* item);
 void destroyInventaire(Inventaire* inv);
 void afficherItem(Item* item,int i);
+
 Inventaire* creerInventaire();
+Inventaire* chargerInventaire();
+void saveInventaire(Inventaire* inv);
+
 void afficherInventaire(Inventaire* inv);
 void ajouterItem(Inventaire* inv, Item* item);
 Item* ajouter_n_item(Item* item, int n, TypeItem type);

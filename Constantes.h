@@ -4,6 +4,7 @@
 
 #ifndef CONSTANTES_H
 #define CONSTANTES_H
-#define WIDTH 800
-#define HEIGHT 600
+#define WIDTH 960
+#define HEIGHT 640
+#define TILE_SIZE 32
 #endif //CONSTANTES_H

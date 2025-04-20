@@ -21,7 +21,6 @@ typedef struct grassLand {
 }GrassLand;
 
 GrassLand* creerGrassLand(int x, int y, GrassLandType type);
-
 void afficherGrassLand(GrassLand *gl, int pos_x, int pos_y);
 void destroyGrassLand(GrassLand* gl);
 #endif //OBJETS_H

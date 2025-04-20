@@ -7,6 +7,10 @@
 #include <allegro5/bitmap_draw.h>
 #include <allegro5/bitmap_io.h>
 
+#include "Constantes.h"
+
+#include <stdlib.h>
+
 
 GrassLand* creerGrassLand(int x, int y, GrassLandType type) {
     GrassLand* grass_land = malloc(1 * sizeof(GrassLand));
@@ -42,13 +46,14 @@ void afficherGrassLand(GrassLand *gL, int pos_x, int pos_y) {
     float y = 0;
     switch (gL->type) {
         case ARBRE :
-            x = pos_x * 16;
-            y = (pos_y * 16) - 16;
+            x = pos_x * TILE_SIZE;
+            y = (pos_y * TILE_SIZE) - TILE_SIZE;
             break;
         case ROCHER :
-            x = pos_x * 16;
-            y = pos_y * 16;
+            x = pos_x * TILE_SIZE;
+            y = pos_y * TILE_SIZE;
             break;
     }
-    al_draw_bitmap_region(gL->image, gL->sx, gL->sy, gL->w, gL->h, x, y, 0);
+    // al_draw_bitmap_region(gL->image, gL->sx, gL->sy, gL->w, gL->h, x, y, 0);
+    al_draw_scaled_bitmap(gL->image, gL->sx, gL->sy, gL->w, gL->h, x, y, gL->w*2, gL->h*2,0);
 }

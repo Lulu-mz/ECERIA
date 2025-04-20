@@ -19,4 +19,6 @@
 #include <allegro5/allegro_image.h>
 #include "Joueur.h"
 int animation();
+void afficherMenu();
+void menu(ALLEGRO_EVENT_QUEUE *queue, Carte** carte, Joueur** joueur);
 #endif //JEU_H
