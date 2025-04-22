@@ -10,13 +10,14 @@
 #include "Inventaire.h"
 #include "Joueur.h"
 
-Carte *chargerCarte(int mapWidth, int mapHeight) {
+Carte *chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j) {
     al_init_image_addon();
 
-    FILE *fichier = fopen("../Save/map.txt", "r");
+    char buffer[20];
+    sprintf(buffer,"../Save/map_%d_%d.txt", pos_i, pos_j);
+    FILE *fichier = fopen(buffer, "r");
     if (!fichier) {
-        perror("Erreur ouverture fichier map.txt");
-        exit(EXIT_FAILURE);
+        return NULL;
     }
 
     Carte *carte = malloc(sizeof(Carte));
@@ -71,7 +72,7 @@ Carte *chargerCarte(int mapWidth, int mapHeight) {
     carte->largeur = mapWidth;
     carte->hauteur = mapHeight;
 
-    chargerGrassLand(carte);
+    chargerGrassLand(carte, pos_i, pos_j);
 
     return carte;
 }
@@ -142,9 +143,12 @@ Carte* creerCarte(int w, int h) {
 }
 
 
-int saveCarte(Carte* carte) {
-    FILE *mapFile = fopen("../Save/map.txt", "w");
-    FILE *grassLandFile = fopen("../Save/biome.txt", "w");
+int saveCarte(Carte* carte, int pos_i, int pos_j) {
+    char buffer[20];
+    sprintf(buffer,"../Save/map_%d_%d.txt", pos_i, pos_j);
+    FILE *mapFile = fopen(buffer, "w");
+    sprintf(buffer,"../Save/biome_%d_%d.txt", pos_i, pos_j);
+    FILE *grassLandFile = fopen(buffer, "w");
     if (mapFile == NULL|| grassLandFile == NULL){
         perror("Erreur lors de l'ouverture du fichier");
         return 1;
@@ -201,8 +205,10 @@ void destroyCarte(Carte *carte) {
 }
 
 
-void chargerGrassLand(Carte* carte) {
-    FILE *fichier = fopen("../Save/biome.txt", "r");
+void chargerGrassLand(Carte* carte, int pos_i, int pos_j) {
+    char buffer[20];
+    sprintf(buffer,"../Save/biome_%d_%d.txt", pos_i, pos_j);
+    FILE *fichier = fopen(buffer, "r");
     if (!fichier) {
         perror("Erreur ouverture fichier biome.txt");
         exit(EXIT_FAILURE);

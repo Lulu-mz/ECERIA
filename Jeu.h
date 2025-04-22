@@ -18,7 +18,19 @@
 #include <stdio.h>
 #include <allegro5/allegro_image.h>
 #include "Joueur.h"
+
+typedef struct jeu {
+    Carte*** sections;
+    int mapSize;
+    Joueur* joueur;
+}Jeu;
+
 int animation();
+void deplacerJoueur(Jeu* jeu);
 void afficherMenu();
-void menu(ALLEGRO_EVENT_QUEUE *queue, Carte** carte, Joueur** joueur);
+Jeu* menu(ALLEGRO_EVENT_QUEUE *queue);
+void saveJeu(Jeu* jeu);
+void destroyJeu(Jeu* jeu);
+Jeu* nouvellePartie();
+Jeu* chargerPartie();
 #endif //JEU_H

@@ -29,6 +29,8 @@ Joueur *createJoueur() {
     joueur->sprite_y = 1.0f;
     joueur->degats = 100;
     joueur->inventaire = creerInventaire();
+    joueur->pos_i = MAP_SIZE/2; //position section carte
+    joueur->pos_j = MAP_SIZE/2; //position section carte
 
     ALLEGRO_BITMAP *sprite_sheet = al_load_bitmap("../Assets/Cats/Characters/Character.png");
     if (!sprite_sheet) {
@@ -48,6 +50,7 @@ void saveJoueur(Joueur* joueur) {
     fprintf(joueurFile, "%f %f\n", joueur->x1, joueur->y1);
     fprintf(joueurFile, "%f %f\n", joueur->sprite_x, joueur->sprite_y);
     fprintf(joueurFile, "%d %d\n", joueur->direction, joueur->regard);
+    fprintf(joueurFile, "%d %d\n", joueur->pos_i, joueur->pos_j);
 
     saveInventaire(joueur->inventaire);
 }
@@ -63,6 +66,7 @@ Joueur* chargerJoueur() {
     fscanf(joueurFile, "%f %f", &joueur->x1, &joueur->y1);
     fscanf(joueurFile, "%f %f", &joueur->sprite_x, &joueur->sprite_y);
     fscanf(joueurFile, "%d %d", &joueur->direction, &joueur->regard);
+    fscanf(joueurFile, "%d %d", &joueur->pos_i, &joueur->pos_j);
     joueur->x2 = joueur->x1 + joueur->l; //taille du personnage
     joueur->y2 = joueur->y1 + joueur->h; //taille du personnage
 
@@ -115,58 +119,7 @@ void afficherJoueur(Joueur *joueur, int currentFrame) {
     afficherInventaire(joueur->inventaire);
 }
 
-void deplacerJoueur(Joueur *joueur, Carte *carte) {
-    int next_x;
-    int next_y;
-    switch (joueur->direction) {
-        case DROITE:
-            next_x = (int) (joueur->x2 + joueur->speed) / TILE_SIZE;
-            next_y = (int) joueur->y2 / TILE_SIZE;
-            joueur->regard = RIGHT;
-            if (joueur->x2 < WIDTH && next_x<WIDTH/TILE_SIZE&& carte->map[next_y][next_x].marchable == true && carte->map[(int) joueur->y1 / TILE_SIZE][
-                    next_x].marchable == true) {
-                joueur->x1 += joueur->speed;
-                joueur->x2 += joueur->speed;
-            }
-            break;
 
-        case GAUCHE:
-            next_x = (int) (joueur->x1 - joueur->speed) / TILE_SIZE;
-            next_y = (int) joueur->y1 / TILE_SIZE;
-            joueur->regard = LEFT;
-            if (joueur->x1 > 0.0f && carte->map[next_y][next_x].marchable == true && carte->map[(int) joueur->y2 / TILE_SIZE][
-                    next_x].marchable == true) {
-                joueur->x1 -= joueur->speed;
-                joueur->x2 -= joueur->speed;
-            }
-            break;
-
-        case HAUT:
-            next_x = (int) joueur->x1 / TILE_SIZE;
-            next_y = (int) (joueur->y1 - joueur->speed) / TILE_SIZE;
-            joueur->regard = UP;
-            if (joueur->y1 > 0.0f && carte->map[next_y][next_x].marchable == true && carte->map[next_y][
-                    (int) joueur->x2 / TILE_SIZE].marchable == true) {
-                joueur->y1 -= joueur->speed;
-                joueur->y2 -= joueur->speed;
-            }
-            break;
-
-        case BAS:
-            next_x = (int) joueur->x2 / TILE_SIZE;
-            next_y = (int) (joueur->y2 + joueur->speed) / TILE_SIZE;
-            joueur->regard = DOWN;
-            if (joueur->y2< HEIGHT && next_y<HEIGHT/TILE_SIZE && carte->map[next_y][next_x].marchable == true && carte->map[next_y][
-                    (int) joueur->x1 / TILE_SIZE].marchable == true) {
-                joueur->y1 += joueur->speed;
-                joueur->y2 += joueur->speed;
-            }
-            break;
-
-        default: //direction par défaut = statique
-            break;
-    }
-}
 
 void action(Joueur *joueur, Carte *carte) {
     int next_x = -1; //pour le joueur

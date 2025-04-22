@@ -23,6 +23,103 @@ void registerEventSource(ALLEGRO_DISPLAY *display, ALLEGRO_TIMER *timer, ALLEGRO
 }
 
 
+void deplacerJoueur(Jeu* jeu) {
+    Joueur* joueur = jeu->joueur;
+    Carte* carte = jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j];
+    int next_x; //position en x à la prochaine case
+    int next_y; //position en x à la prochaine case
+    switch (joueur->direction) {
+        case DROITE:
+            next_x = (int) (joueur->x2 + joueur->speed) / TILE_SIZE;
+            next_y = (int) joueur->y2 / TILE_SIZE;
+            joueur->regard = RIGHT;
+            if (joueur->x2 < WIDTH && next_x<WIDTH/TILE_SIZE&& carte->map[next_y][next_x].marchable == true && carte->map[(int) joueur->y1 / TILE_SIZE][
+                    next_x].marchable == true) {
+                joueur->x1 += joueur->speed;
+                joueur->x2 += joueur->speed;
+            }
+            if(next_x >= WIDTH/TILE_SIZE) { //si on arrive au bord à droite d'une carte
+                if(jeu->joueur->pos_j + 1 < jeu->mapSize) {
+                    if(jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j+1] == NULL) {
+                        jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j+1] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
+                    }
+                    jeu->joueur->pos_j++;
+                    joueur->x1 = 10;
+                    joueur->x2 = joueur->x1 + joueur->l; //hitbox
+                }
+            }
+            break;
+
+        case GAUCHE:
+            next_x = (int) (joueur->x1 - joueur->speed) / TILE_SIZE;
+            next_y = (int) joueur->y1 / TILE_SIZE;
+            joueur->regard = LEFT;
+            if (joueur->x1 > 0.0f && carte->map[next_y][next_x].marchable == true && carte->map[(int) joueur->y2 / TILE_SIZE][
+                    next_x].marchable == true) {
+                joueur->x1 -= joueur->speed;
+                joueur->x2 -= joueur->speed;
+            }
+            if(next_x<= 0) { //si on arrive au bord à gauche d'une carte
+                if(jeu->joueur->pos_j - 1 < jeu->mapSize) {
+                    if(jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j-1] == NULL) {
+                        jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j-1] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
+                    }
+                    jeu->joueur->pos_j--;
+                    joueur->x1 = WIDTH - 10;
+                    joueur->x2 = joueur->x1 + joueur->l; //hitbox
+                }
+            }
+            break;
+
+        case HAUT:
+            next_x = (int) joueur->x1 / TILE_SIZE;
+            next_y = (int) (joueur->y1 - joueur->speed) / TILE_SIZE;
+            joueur->regard = UP;
+            if (joueur->y1 > 0.0f && carte->map[next_y][next_x].marchable == true && carte->map[next_y][
+                    (int) joueur->x2 / TILE_SIZE].marchable == true) {
+                joueur->y1 -= joueur->speed;
+                joueur->y2 -= joueur->speed;
+            }
+            if(next_y<= 0) { //si on arrive au bord en haut d'une carte
+                if(jeu->joueur->pos_i - 1 < jeu->mapSize) {
+                    if(jeu->sections[jeu->joueur->pos_i - 1][jeu->joueur->pos_j] == NULL) {
+                        jeu->sections[jeu->joueur->pos_i - 1][jeu->joueur->pos_j] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
+                    }
+                    jeu->joueur->pos_i--;
+                    joueur->y1 = HEIGHT - 10;
+                    joueur->y2 = joueur->y1 + joueur->h; //hitbox
+                }
+            }
+            break;
+
+        case BAS:
+            next_x = (int) joueur->x2 / TILE_SIZE;
+            next_y = (int) (joueur->y2 + joueur->speed) / TILE_SIZE;
+            joueur->regard = DOWN;
+            if (joueur->y2< HEIGHT && next_y<HEIGHT/TILE_SIZE && carte->map[next_y][next_x].marchable == true && carte->map[next_y][
+                    (int) joueur->x1 / TILE_SIZE].marchable == true) {
+                joueur->y1 += joueur->speed;
+                joueur->y2 += joueur->speed;
+            }
+            if(next_y >= HEIGHT/TILE_SIZE) { //si on arrive au bord en bas d'une carte
+                if(jeu->joueur->pos_i + 1 < jeu->mapSize) {
+                    if(jeu->sections[jeu->joueur->pos_i + 1][jeu->joueur->pos_j] == NULL) {
+                        jeu->sections[jeu->joueur->pos_i + 1][jeu->joueur->pos_j] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
+                    }
+                    jeu->joueur->pos_i++;
+                    joueur->y1 = 10;
+                    joueur->y2 = joueur->y1 + joueur->h; //hitbox
+                }
+            }
+            break;
+
+        default: //direction par défaut = statique
+            break;
+    }
+}
+
+//FIXME : bug quand on va au bord d'une carte et au bord du jeu => ça crash tout
+
 int animation() {
     installation();
 
@@ -34,15 +131,13 @@ int animation() {
 
     al_start_timer(timer);
 
-    Joueur *joueur = NULL;
     ALLEGRO_KEYBOARD_STATE keyboard_state;
 
     int currentFrame = 0;
     int frameTime = 0;
 
-    Carte* carte = NULL;
-    menu(queue, &carte, &joueur); // Chargement du menu + carte choisie
-    if (!carte || !joueur) {
+    Jeu* jeu = menu(queue); // Chargement du menu + carte choisie
+    if (!jeu) {
         al_destroy_timer(timer);
         al_destroy_event_queue(queue);
         al_destroy_display(window);
@@ -61,30 +156,31 @@ int animation() {
         }
 
         if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_E) {
-            action(joueur, carte);
+            action(jeu->joueur, jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j]);
+            //TODO: remplacer par jeu
         }
 
         if (event.type == ALLEGRO_EVENT_TIMER) {
-            afficherCarte(carte);
-            afficherJoueur(joueur, currentFrame);
+            afficherCarte(jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j]);
+            afficherJoueur(jeu->joueur, currentFrame);
             al_flip_display();
+            //TODO: afficher jeu
         }
 
         // Mouvement joueur
         if (al_key_down(&keyboard_state, ALLEGRO_KEY_D)) {
-            joueur->direction = DROITE;
+            jeu->joueur->direction = DROITE;
         } else if (al_key_down(&keyboard_state, ALLEGRO_KEY_Q)) {
-            joueur->direction = GAUCHE;
+            jeu->joueur->direction = GAUCHE;
         } else if (al_key_down(&keyboard_state, ALLEGRO_KEY_Z)) {
-            joueur->direction = HAUT;
+            jeu->joueur->direction = HAUT;
         } else if (al_key_down(&keyboard_state, ALLEGRO_KEY_S)) {
-            joueur->direction = BAS;
+            jeu->joueur->direction = BAS;
         } else {
-            joueur->direction = STATIQUE;
+            jeu->joueur->direction = STATIQUE;
         }
 
-        deplacerJoueur(joueur, carte);
-
+        deplacerJoueur(jeu);
         frameTime += 16;
         if (frameTime >= 600) {
             currentFrame = (currentFrame + 1) % 2;
@@ -92,10 +188,8 @@ int animation() {
         }
     }
 
-    saveCarte(carte);
-    saveJoueur(joueur);
-    destroyJoueur(joueur);
-    destroyCarte(carte);
+    saveJeu(jeu);
+    destroyJeu(jeu);
 
     al_destroy_timer(timer);
     al_destroy_event_queue(queue);
@@ -131,14 +225,16 @@ void afficherMenu(ALLEGRO_BITMAP* menu_background, ALLEGRO_BITMAP* button) {
 }
 
 
-void menu(ALLEGRO_EVENT_QUEUE *queue, Carte** carte, Joueur** joueur) {
+Jeu* menu(ALLEGRO_EVENT_QUEUE *queue) {
     ALLEGRO_BITMAP *background = al_load_bitmap("../Assets/background_2.jpg");
     ALLEGRO_BITMAP *button = al_load_bitmap("../Assets/button.png");
 
     if (!background || !button) {
         fprintf(stderr, "Erreur de chargement d'image.\n");
-        return;
+        return NULL;
     }
+
+    Jeu* jeu = NULL;
 
     bool in_menu = true;
 
@@ -150,8 +246,7 @@ void menu(ALLEGRO_EVENT_QUEUE *queue, Carte** carte, Joueur** joueur) {
         al_wait_for_event(queue, &event);
 
         if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-            carte = NULL;
-            joueur = NULL;
+            jeu = NULL;
             in_menu = false;
         }
 
@@ -167,15 +262,11 @@ void menu(ALLEGRO_EVENT_QUEUE *queue, Carte** carte, Joueur** joueur) {
 
             if (x >= button_x && x <= button_x + button_width &&
                 y >= first_button_y && y <= first_button_y + button_height) {
-                *carte = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
-                saveCarte(*carte);
-                *joueur = createJoueur();
-                saveJoueur(*joueur);
+                jeu = nouvellePartie();
                 in_menu = false;
                 } else if (x >= button_x && x <= button_x + button_width &&
                            y >= second_button_y && y <= second_button_y + button_height) {
-                    *carte = chargerCarte(WIDTH / TILE_SIZE, HEIGHT / TILE_SIZE);
-                    *joueur = chargerJoueur();
+                    jeu = chargerPartie();
                     in_menu = false;
                            }
         }
@@ -183,4 +274,74 @@ void menu(ALLEGRO_EVENT_QUEUE *queue, Carte** carte, Joueur** joueur) {
 
     al_destroy_bitmap(background);
     al_destroy_bitmap(button);
+    return jeu;
+}
+
+
+Jeu* nouvellePartie() {
+    Jeu* jeu = malloc(1*sizeof(Jeu));
+    jeu->mapSize = MAP_SIZE;
+    jeu->sections = malloc(jeu->mapSize*sizeof(Carte**));
+    for (int i = 0; i < jeu->mapSize; i++) {
+        jeu->sections[i] = malloc(jeu->mapSize*sizeof(Carte*));
+    }
+    char buffer[50];
+    for(int i = 0; i < jeu->mapSize; i++) {
+        for(int j = 0; j < jeu->mapSize; j++) {
+            jeu->sections[i][j] = NULL;
+            sprintf(buffer, "../Save/map_%d_%d.txt",i,j);
+            remove(buffer);
+            sprintf(buffer, "../Save/biome_%d_%d.txt",i,j);
+            remove(buffer);
+        }
+    }
+    jeu->joueur = createJoueur();
+    jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
+    saveJeu(jeu);
+    return jeu;
+}
+
+
+Jeu* chargerPartie() {
+    Jeu* jeu = malloc(1*sizeof(Jeu));
+    jeu->mapSize = MAP_SIZE;
+    jeu->sections = malloc(jeu->mapSize*sizeof(Carte**));
+    for (int i = 0; i < jeu->mapSize; i++) {
+        jeu->sections[i] = malloc(jeu->mapSize*sizeof(Carte*));
+    }
+    for(int i = 0; i < jeu->mapSize; i++) {
+        for(int j = 0; j < jeu->mapSize; j++) {
+            jeu->sections[i][j] = chargerCarte(WIDTH / TILE_SIZE, HEIGHT / TILE_SIZE, i, j);
+        }
+    }
+    jeu->joueur = chargerJoueur();
+    return jeu;
+}
+
+
+void saveJeu(Jeu* jeu) {
+    saveJoueur(jeu->joueur);
+    for(int i = 0; i < jeu->mapSize; i++) {
+        for(int j = 0; j < jeu->mapSize; j++) {
+            if(jeu->sections[i][j] != NULL) {
+                saveCarte(jeu->sections[i][j], i, j);
+            }
+        }
+    }
+}
+
+void destroyJeu(Jeu* jeu) {
+    destroyJoueur(jeu->joueur);
+    for(int i = 0; i < jeu->mapSize; i++) {
+        for(int j = 0; j < jeu->mapSize; j++) {
+            if(jeu->sections[i][j]!= NULL) {
+                destroyCarte(jeu->sections[i][j]);
+            }
+        }
+    }
+    for (int i = 0; i < jeu->mapSize; i++) {
+        free(jeu->sections[i]);
+    }
+    free(jeu->sections);
+    free(jeu);
 }

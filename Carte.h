@@ -37,10 +37,10 @@ typedef struct carte {
     int hauteur;
 }Carte;
 
-Carte* chargerCarte(int mapWidth, int mapHeight);
+Carte* chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j);
 void afficherCarte(Carte* carte);
 void destroyCarte(Carte* carte);
-void chargerGrassLand(Carte* carte);
+void chargerGrassLand(Carte* carte, int pos_i, int pos_j);
 Carte* creerCarte(int w, int h);
-int saveCarte(Carte* carte);
+int saveCarte(Carte* carte, int pos_i, int pos_j);
 #endif //CARTE_H

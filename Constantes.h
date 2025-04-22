@@ -7,4 +7,6 @@
 #define WIDTH 960
 #define HEIGHT 640
 #define TILE_SIZE 32
+#define MAP_SIZE 3
+
 #endif //CONSTANTES_H

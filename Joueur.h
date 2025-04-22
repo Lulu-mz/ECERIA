@@ -31,6 +31,8 @@ typedef struct j {
     int degats;
     Watching regard;
     Inventaire* inventaire;
+    int pos_i; //positions section
+    int pos_j; //positions section
 }Joueur;
 
 Joueur* createJoueur();
@@ -38,7 +40,6 @@ Joueur* chargerJoueur();
 void saveJoueur(Joueur* joueur);
 void destroyJoueur(Joueur* joueur);
 void afficherJoueur(Joueur* joueur, int curentFrame);
-void deplacerJoueur(Joueur* joueur, Carte* carte);
 void action(Joueur* joueur, Carte* carte);
 void destroyInventaire(Inventaire* inv);
 Item* taperGrassLand(Carte* carte, Joueur* joueur, int x, int y, int x2, int y2);
