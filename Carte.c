@@ -10,6 +10,38 @@
 #include "Inventaire.h"
 #include "Joueur.h"
 
+Case chargerCase(int valeur, Case c, int i, int j) {
+    c.vide = false;
+    if (valeur == 0) {
+        c.grassLand = creerGrassLand(i, j, ARBRE);
+        c.marchable = false;
+        c.maison = NULL;
+    } else if (valeur == 1) {
+        c.grassLand = creerGrassLand(i, j, ROCHER);
+        c.marchable = false;
+        c.maison = NULL;
+    } else if(valeur == 2) {
+        c.grassLand = NULL;
+        c.marchable = false;
+        c.maison = NULL;
+        c.vide = true;
+    } else if (valeur == 3) {
+        c.grassLand = NULL;
+        c.marchable = false;
+        c.maison = creerMaison(MAISON_0);
+    }
+    else if (valeur == 4) {
+        c.grassLand = NULL;
+        c.marchable = false;
+        c.maison = creerMaison(MAISON_1);
+    }
+    else {
+        c.grassLand = NULL;
+        c.maison = NULL;
+    }
+    return c;
+}
+
 Carte *chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j) {
     al_init_image_addon();
 
@@ -124,15 +156,7 @@ Carte* creerCarte(int w, int h) {
             if (rand() % 50 < 1) {
                 valeur = rand() % 2; // 0 ou 1
             }
-            if (valeur == 0) {
-                carte->map[i][j].grassLand = creerGrassLand(i, j, ARBRE);
-                carte->map[i][j].marchable = false;
-            } else if (valeur == 1) {
-                carte->map[i][j].grassLand = creerGrassLand(i, j, ROCHER);
-                carte->map[i][j].marchable = false;
-            } else {
-                carte->map[i][j].grassLand = NULL;
-            }
+            carte->map[i][j] = chargerCase(valeur,carte->map[i][j], i, j);
         }
     }
 
@@ -183,12 +207,16 @@ int saveCarte(Carte* carte, int pos_i, int pos_j) {
 void afficherCarte(Carte *carte) {
     for (int i = 0; i < carte->hauteur; i++) {
         for (int j = 0; j < carte->largeur; j++) {
-            // al_draw_bitmap(carte->map[i][j].image, j * 16, i * 16, 0);
             int imageL=16,imageH=16;
-            al_draw_rectangle(j*32,i*32,j*32+32,i*32+32,al_map_rgb(0,0,0),2 );
-            al_draw_scaled_bitmap(carte->map[i][j].image,0,0,imageL,imageH, j * carte->map[i][j].size, i * carte->map[i][j].size,carte->map[i][j].size,carte->map[i][j].size, 0);
+            if(carte->map[i][j].vide == false) {
+                al_draw_rectangle(j*32,i*32,j*32+32,i*32+32,al_map_rgb(0,0,0),2 );
+                al_draw_scaled_bitmap(carte->map[i][j].image,0,0,imageL,imageH, j * carte->map[i][j].size, i * carte->map[i][j].size,carte->map[i][j].size,carte->map[i][j].size, 0);
+            }
             if (carte->map[i][j].grassLand != NULL) {
                 afficherGrassLand(carte->map[i][j].grassLand, j, i); //Inversé
+            }
+            if (carte->map[i][j].maison != NULL) {
+                afficherMaison(carte->map[i][j].maison, j, i);
             }
         }
     }
@@ -222,16 +250,7 @@ void chargerGrassLand(Carte* carte, int pos_i, int pos_j) {
                 fclose(fichier);
                 exit(EXIT_FAILURE);
             }
-
-            if (valeur == 0) {
-                carte->map[i][j].grassLand = creerGrassLand(i, j, ARBRE);
-                carte->map[i][j].marchable = false;
-            } else if (valeur == 1) {
-                carte->map[i][j].grassLand = creerGrassLand(i, j, ROCHER);
-                carte->map[i][j].marchable = false;
-            } else {
-                carte->map[i][j].grassLand = NULL;
-            }
+            carte->map[i][j] = chargerCase(valeur,carte->map[i][j], i, j);
         }
     }
 

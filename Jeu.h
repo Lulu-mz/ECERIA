@@ -35,14 +35,18 @@ typedef struct bs {
     float alpha;
 } ButtonState;
 
-int animation();
-void deplacerJoueur(Jeu* jeu);
-// void afficherMenu();
+
+//Menu :
 Jeu* menu(ALLEGRO_EVENT_QUEUE *queue);
 void afficherMenu(ALLEGRO_BITMAP* background, ALLEGRO_BITMAP* buttonImg, ButtonState *btnNewGame, ButtonState *btnLoadGame);
 void afficherButton(ALLEGRO_BITMAP *buttonImg, ButtonState *btn);
+
+//Jeu :
+int animation();
 void saveJeu(Jeu* jeu);
 void destroyJeu(Jeu* jeu);
 Jeu* nouvellePartie();
 Jeu* chargerPartie();
+//Joueur dans le jeu :
+void deplacerJoueur(Jeu* jeu);
 #endif //JEU_H

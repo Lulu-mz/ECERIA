@@ -14,7 +14,9 @@ add_executable(Projet_ft__Supdepub main.c
         Biome.c
         Biome.h
         Inventaire.c
-        Inventaire.h)
+        Inventaire.h
+        Maison.c
+        Maison.h)
 IF(WIN32)
     target_link_libraries(Projet_ft__Supdepub -lmingw32 -lallegro-5.0.10-monolith-md-debug)
 ELSE()

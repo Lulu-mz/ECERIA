@@ -12,6 +12,7 @@
 #include <allegro5/allegro_image.h>
 
 #include "Biome.h"
+#include "Maison.h"
 
 
 //TODO : faire une structure image
@@ -27,8 +28,10 @@ typedef struct c {
     Type typeCase;
     ALLEGRO_BITMAP* image;
     bool marchable;
+    bool vide;
     GrassLand* grassLand;
     int size;
+    Maison* maison;
 }Case;
 
 typedef struct carte {
