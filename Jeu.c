@@ -39,12 +39,12 @@ void deplacerJoueur(Jeu* jeu) {
                 joueur->x2 += joueur->speed;
             }
             if(next_x >= WIDTH/TILE_SIZE) { //si on arrive au bord à droite d'une carte
-                if(jeu->joueur->pos_j + 1 < jeu->mapSize) {
+                if(jeu->joueur->pos_j + 1 < jeu->mapSize) { //si on arrive au bord du jeu
                     if(jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j+1] == NULL) {
                         jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j+1] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
                     }
                     jeu->joueur->pos_j++;
-                    joueur->x1 = 10;
+                    joueur->x1 = joueur->l;
                     joueur->x2 = joueur->x1 + joueur->l; //hitbox
                 }
             }
@@ -60,13 +60,13 @@ void deplacerJoueur(Jeu* jeu) {
                 joueur->x2 -= joueur->speed;
             }
             if(next_x<= 0) { //si on arrive au bord à gauche d'une carte
-                if(jeu->joueur->pos_j - 1 < jeu->mapSize) {
+                if(jeu->joueur->pos_j - 1 >=0) { //si on arrive au bord du jeu
                     if(jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j-1] == NULL) {
                         jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j-1] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
                     }
                     jeu->joueur->pos_j--;
-                    joueur->x1 = WIDTH - 10;
-                    joueur->x2 = joueur->x1 + joueur->l; //hitbox
+                    joueur->x2 = WIDTH - joueur->l;
+                    joueur->x1 = joueur->x2 - joueur->l; //hitbox
                 }
             }
             break;
@@ -81,13 +81,13 @@ void deplacerJoueur(Jeu* jeu) {
                 joueur->y2 -= joueur->speed;
             }
             if(next_y<= 0) { //si on arrive au bord en haut d'une carte
-                if(jeu->joueur->pos_i - 1 < jeu->mapSize) {
+                if(jeu->joueur->pos_i - 1 >= 0) { //si on arrive au bord du jeu
                     if(jeu->sections[jeu->joueur->pos_i - 1][jeu->joueur->pos_j] == NULL) {
                         jeu->sections[jeu->joueur->pos_i - 1][jeu->joueur->pos_j] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
                     }
                     jeu->joueur->pos_i--;
-                    joueur->y1 = HEIGHT - 10;
-                    joueur->y2 = joueur->y1 + joueur->h; //hitbox
+                    joueur->y2 = HEIGHT - joueur->h;
+                    joueur->y1 = joueur->y2 - joueur->h; //hitbox
                 }
             }
             break;
@@ -102,12 +102,12 @@ void deplacerJoueur(Jeu* jeu) {
                 joueur->y2 += joueur->speed;
             }
             if(next_y >= HEIGHT/TILE_SIZE) { //si on arrive au bord en bas d'une carte
-                if(jeu->joueur->pos_i + 1 < jeu->mapSize) {
+                if(jeu->joueur->pos_i + 1 < jeu->mapSize) { //si on arrive au bord du jeu
                     if(jeu->sections[jeu->joueur->pos_i + 1][jeu->joueur->pos_j] == NULL) {
                         jeu->sections[jeu->joueur->pos_i + 1][jeu->joueur->pos_j] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
                     }
                     jeu->joueur->pos_i++;
-                    joueur->y1 = 10;
+                    joueur->y1 = joueur->h;
                     joueur->y2 = joueur->y1 + joueur->h; //hitbox
                 }
             }
@@ -118,7 +118,6 @@ void deplacerJoueur(Jeu* jeu) {
     }
 }
 
-//FIXME : bug quand on va au bord d'une carte et au bord du jeu => ça crash tout
 
 int animation() {
     installation();
@@ -157,14 +156,12 @@ int animation() {
 
         if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_E) {
             action(jeu->joueur, jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j]);
-            //TODO: remplacer par jeu
         }
 
         if (event.type == ALLEGRO_EVENT_TIMER) {
             afficherCarte(jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j]);
             afficherJoueur(jeu->joueur, currentFrame);
             al_flip_display();
-            //TODO: afficher jeu
         }
 
         // Mouvement joueur
@@ -199,7 +196,28 @@ int animation() {
 }
 
 
-void afficherMenu(ALLEGRO_BITMAP* menu_background, ALLEGRO_BITMAP* button) {
+void afficherButton(ALLEGRO_BITMAP *buttonImg, ButtonState *btn) {
+    float drawX = btn->x - ((btn->scale - 1.0f) * btn->width / 2.0f);
+    float drawY = btn->y - ((btn->scale - 1.0f) * btn->height / 2.0f);
+    float drawWidth = btn->width * btn->scale;
+    float drawHeight = btn->height * btn->scale;
+
+    ALLEGRO_COLOR tint = al_map_rgba_f(btn->alpha, btn->alpha, btn->alpha, btn->alpha);
+
+    al_draw_tinted_scaled_bitmap(
+        buttonImg,
+        tint,
+        0, 0, 697, 337, // Taille réelle de ton image source
+        drawX,
+        drawY,
+        drawWidth,
+        drawHeight,
+        0
+    );
+}
+
+
+/*void afficherMenu(ALLEGRO_BITMAP* menu_background, ALLEGRO_BITMAP* button) {
     al_draw_bitmap(menu_background, 0, 0, 0);
 
     // Position des boutons
@@ -222,24 +240,62 @@ void afficherMenu(ALLEGRO_BITMAP* menu_background, ALLEGRO_BITMAP* button) {
     } else {
         fprintf(stderr, "Erreur lors de la création de la police.\n");
     }
+}*/
+
+void afficherMenu(ALLEGRO_BITMAP* background, ALLEGRO_BITMAP* buttonImg,
+                  ButtonState *btnNewGame, ButtonState *btnLoadGame) {
+    al_draw_bitmap(background, 0, 0, 0);
+
+    afficherButton(buttonImg, btnNewGame);
+    afficherButton(buttonImg, btnLoadGame);
+
+    ALLEGRO_FONT *font = al_load_ttf_font("../Assets/Arial.ttf", 20, 0);
+    if (font) {
+        al_draw_text(font, al_map_rgb(0, 0, 0), WIDTH / 2, btnNewGame->y + 25, ALLEGRO_ALIGN_CENTRE, "Nouvelle partie");
+        al_draw_text(font, al_map_rgb(0, 0, 0), WIDTH / 2, btnLoadGame->y + 25, ALLEGRO_ALIGN_CENTRE, "Charger une partie");
+        al_destroy_font(font);
+    } else {
+        fprintf(stderr, "Erreur lors de la création de la police.\n");
+    }
 }
 
 
 Jeu* menu(ALLEGRO_EVENT_QUEUE *queue) {
     ALLEGRO_BITMAP *background = al_load_bitmap("../Assets/background_2.jpg");
-    ALLEGRO_BITMAP *button = al_load_bitmap("../Assets/button.png");
+    ALLEGRO_BITMAP *buttonImg = al_load_bitmap("../Assets/button.png");
 
-    if (!background || !button) {
+    if (!background || !buttonImg) {
         fprintf(stderr, "Erreur de chargement d'image.\n");
         return NULL;
     }
 
     Jeu* jeu = NULL;
-
     bool in_menu = true;
 
+    ButtonState btnNewGame = { (WIDTH - 300) / 2.0f, 300, 300, 80, false, false, 1.0f, 1.0f };
+    ButtonState btnLoadGame = { btnNewGame.x, btnNewGame.y + 110, 300, 80, false, false, 1.0f, 1.0f };
+
     while (in_menu) {
-        afficherMenu(background, button);
+        ALLEGRO_MOUSE_STATE mouse;
+        al_get_mouse_state(&mouse);
+        int mx = mouse.x;
+        int my = mouse.y;
+
+        // Gestion Hover + Click bouton Nouvelle partie
+        btnNewGame.hovered = (mx >= btnNewGame.x && mx <= btnNewGame.x + btnNewGame.width &&
+                              my >= btnNewGame.y && my <= btnNewGame.y + btnNewGame.height);
+        btnNewGame.clicked = btnNewGame.hovered && (mouse.buttons & 1);
+        btnNewGame.scale = btnNewGame.hovered ? 1.1f : 1.0f;
+        btnNewGame.alpha = btnNewGame.clicked ? 0.5f : 1.0f;
+
+        // Gestion Hover + Click bouton Charger
+        btnLoadGame.hovered = (mx >= btnLoadGame.x && mx <= btnLoadGame.x + btnLoadGame.width &&
+                               my >= btnLoadGame.y && my <= btnLoadGame.y + btnLoadGame.height);
+        btnLoadGame.clicked = btnLoadGame.hovered && (mouse.buttons & 1);
+        btnLoadGame.scale = btnLoadGame.hovered ? 1.1f : 1.0f;
+        btnLoadGame.alpha = btnLoadGame.clicked ? 0.5f : 1.0f;
+
+        afficherMenu(background, buttonImg, &btnNewGame, &btnLoadGame);
         al_flip_display();
 
         ALLEGRO_EVENT event;
@@ -251,31 +307,73 @@ Jeu* menu(ALLEGRO_EVENT_QUEUE *queue) {
         }
 
         if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
-            int x = event.mouse.x;
-            int y = event.mouse.y;
-
-            float button_width = 300;
-            float button_height = 80;
-            float button_x = (WIDTH - button_width) / 2.0f;
-            float first_button_y = 300;
-            float second_button_y = first_button_y + button_height + 30;
-
-            if (x >= button_x && x <= button_x + button_width &&
-                y >= first_button_y && y <= first_button_y + button_height) {
+            if (btnNewGame.hovered) {
                 jeu = nouvellePartie();
                 in_menu = false;
-                } else if (x >= button_x && x <= button_x + button_width &&
-                           y >= second_button_y && y <= second_button_y + button_height) {
-                    jeu = chargerPartie();
-                    in_menu = false;
-                           }
+            } else if (btnLoadGame.hovered) {
+                jeu = chargerPartie();
+                in_menu = false;
+            }
         }
     }
 
     al_destroy_bitmap(background);
-    al_destroy_bitmap(button);
+    al_destroy_bitmap(buttonImg);
     return jeu;
 }
+
+
+// Jeu* menu(ALLEGRO_EVENT_QUEUE *queue) {
+//     ALLEGRO_BITMAP *background = al_load_bitmap("../Assets/background_2.jpg");
+//     ALLEGRO_BITMAP *button = al_load_bitmap("../Assets/button.png");
+//
+//     if (!background || !button) {
+//         fprintf(stderr, "Erreur de chargement d'image.\n");
+//         return NULL;
+//     }
+//
+//     Jeu* jeu = NULL;
+//
+//     bool in_menu = true;
+//
+//     while (in_menu) {
+//         afficherMenu(background, button);
+//         al_flip_display();
+//
+//         ALLEGRO_EVENT event;
+//         al_wait_for_event(queue, &event);
+//
+//         if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+//             jeu = NULL;
+//             in_menu = false;
+//         }
+//
+//         if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
+//             int x = event.mouse.x;
+//             int y = event.mouse.y;
+//
+//             float button_width = 300;
+//             float button_height = 80;
+//             float button_x = (WIDTH - button_width) / 2.0f;
+//             float first_button_y = 300;
+//             float second_button_y = first_button_y + button_height + 30;
+//
+//             if (x >= button_x && x <= button_x + button_width &&
+//                 y >= first_button_y && y <= first_button_y + button_height) {
+//                 jeu = nouvellePartie();
+//                 in_menu = false;
+//                 } else if (x >= button_x && x <= button_x + button_width &&
+//                            y >= second_button_y && y <= second_button_y + button_height) {
+//                     jeu = chargerPartie();
+//                     in_menu = false;
+//                            }
+//         }
+//     }
+//
+//     al_destroy_bitmap(background);
+//     al_destroy_bitmap(button);
+//     return jeu;
+// }
 
 
 Jeu* nouvellePartie() {

@@ -25,10 +25,22 @@ typedef struct jeu {
     Joueur* joueur;
 }Jeu;
 
+//Bouton :
+typedef struct bs {
+    float x, y;         // Position initiale du bouton
+    float width, height;
+    bool hovered;
+    bool clicked;
+    float scale;
+    float alpha;
+} ButtonState;
+
 int animation();
 void deplacerJoueur(Jeu* jeu);
-void afficherMenu();
+// void afficherMenu();
 Jeu* menu(ALLEGRO_EVENT_QUEUE *queue);
+void afficherMenu(ALLEGRO_BITMAP* background, ALLEGRO_BITMAP* buttonImg, ButtonState *btnNewGame, ButtonState *btnLoadGame);
+void afficherButton(ALLEGRO_BITMAP *buttonImg, ButtonState *btn);
 void saveJeu(Jeu* jeu);
 void destroyJeu(Jeu* jeu);
 Jeu* nouvellePartie();
