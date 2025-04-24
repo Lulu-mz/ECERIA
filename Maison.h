@@ -16,6 +16,7 @@ typedef  struct m {
     int hauteur;
     ALLEGRO_BITMAP* image;
     TypeMaison type;
+    int valeur;
 }Maison;
 
 Maison* creerMaison(TypeMaison type);

@@ -22,14 +22,17 @@ Maison* creerMaison(TypeMaison type) {
         case MAISON_0 :
             m->largeur = 3;
             m->hauteur = 3;
+            m->valeur = 3;
         break;
         case MAISON_1 :
             m->largeur = 5;
             m->hauteur = 3;
+            m->valeur = 4;
         break;
     }
     return m;
 }
+
 
 void afficherMaison(Maison* m, int pos_x, int pos_y) {
     int sw = 16;

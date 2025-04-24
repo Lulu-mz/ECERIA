@@ -116,6 +116,9 @@ Carte* creerCarte(int w, int h) {
         carte->map[i] = malloc(w * sizeof(Case));
     }
 
+    carte->largeur = w;
+    carte->hauteur = h;
+
     srand(time(NULL));
 
     ALLEGRO_BITMAP *herbe = al_load_bitmap("../Assets/Tiles/tile_0000.png");
@@ -133,6 +136,8 @@ Carte* creerCarte(int w, int h) {
             carte->map[i][j].grassLand = NULL;
             carte->map[i][j].size = TILE_SIZE;
             carte->map[i][j].marchable = true;
+            carte->map[i][j].maison = NULL;
+            carte->map[i][j].vide = false;
 
             switch (valeur) {
                 case 0:
@@ -151,18 +156,10 @@ Carte* creerCarte(int w, int h) {
                     printf("Valeur inconnue %d dans map.txt à la position (%d, %d)\n", valeur, i, j);
                 exit(EXIT_FAILURE);
             }
-            valeur = -1; //par défaut : rien
-            // 1 chance sur 50 d'avoir un grassland
-            if (rand() % 50 < 1) {
-                valeur = rand() % 2; // 0 ou 1
-            }
-            carte->map[i][j] = chargerCase(valeur,carte->map[i][j], i, j);
         }
     }
-
-    carte->largeur = w;
-    carte->hauteur = h;
-
+    genererMaisons(carte);
+    genererGrassLand(carte);
     return carte;
 }
 
@@ -186,6 +183,12 @@ int saveCarte(Carte* carte, int pos_i, int pos_j) {
             int glType = -1; //il n'y a pas de grassLand
             if(carte->map[i][j].grassLand != NULL) { //égal à null par défaut => pas de grassLand
                 glType = carte->map[i][j].grassLand->type;
+            }
+            else if(carte->map[i][j].maison != NULL) {
+                glType = carte->map[i][j].maison->valeur;
+            }
+            else if(carte->map[i][j].vide == true) {
+                glType = 2;
             }
             fprintf(grassLandFile, "%d", glType);
 
@@ -291,4 +294,61 @@ Item* taperGrassLand(Carte* carte, Joueur* joueur, int x, int y, int x2, int y2)
     Item * to_add = creerItem(type_item);
     to_add->nb = nb_items;
     return to_add;
+}
+
+
+int isValidSpace(Carte* carte, int pos_x, int pos_y, Maison* m){
+    for (int y = pos_y ; y < pos_y+m->hauteur ; y++)
+    {
+        for (int x = pos_x ; x < pos_x+m->largeur ; x++)
+        {
+            //Est ce que c'est libre
+            if (carte->map[y][x].grassLand != NULL || carte->map[y][x].maison != NULL || carte->map[y][x].vide == true) {
+                // Recommence
+                return 0;
+            }
+        }
+    }
+    return 1;
+}
+
+void genererMaisons(Carte* carte) {
+    srand(time(NULL));
+    int pos_x, pos_y;
+    int nbMaison = rand()%5;
+    for(int i = 0; i < nbMaison; i++) {
+        TypeMaison type = rand()%2;
+        Maison * m = creerMaison(type);
+        do {
+            pos_x = rand()%((carte->largeur)-(m->largeur));
+            pos_y = rand()%((carte->hauteur)-(m->hauteur));
+        }while(!isValidSpace(carte, pos_x, pos_y, m));
+
+        for (int y = pos_y ; y < pos_y+m->hauteur ; y++)
+        {
+            for (int x = pos_x ; x < pos_x+m->largeur ; x++) {
+                if(y == pos_y && x == pos_x) {
+                    carte->map[y][x] = chargerCase(m->valeur, carte->map[y][x], y, x);
+                }
+                else {
+                    carte->map[y][x] = chargerCase(2, carte->map[y][x], y, x);
+                }
+            }
+        }
+        destroyMaison(m);
+    }
+}
+
+void genererGrassLand(Carte* carte) {
+    srand(time(NULL));
+    int i, j;
+    int nbGrassLand = rand()%20;
+    for(int k = 0; k<nbGrassLand; k++){
+        do {
+            i = rand()%carte->hauteur;
+            j = rand()%carte->largeur;
+        }while(carte->map[i][j].grassLand != NULL || carte->map[i][j].maison != NULL || carte->map[i][j].vide == true);
+        GrassLandType type = rand() % 2; // 0 : arbre ou 1 : rocher
+        carte->map[i][j] = chargerCase(type,carte->map[i][j], i, j);
+    }
 }

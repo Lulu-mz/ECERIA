@@ -46,4 +46,6 @@ void destroyCarte(Carte* carte);
 void chargerGrassLand(Carte* carte, int pos_i, int pos_j);
 Carte* creerCarte(int w, int h);
 int saveCarte(Carte* carte, int pos_i, int pos_j);
+void genererMaisons(Carte* carte);
+void genererGrassLand(Carte* carte);
 #endif //CARTE_H
