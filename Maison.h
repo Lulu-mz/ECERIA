@@ -11,6 +11,14 @@ typedef enum type_m {
     MAISON_1
 }TypeMaison;
 
+typedef struct p {
+    int x;
+    int y;
+    bool doubles;
+    int val;
+    ALLEGRO_BITMAP* image;
+}Porte;
+
 typedef  struct m {
     int largeur;
     int hauteur;
@@ -22,4 +30,7 @@ typedef  struct m {
 Maison* creerMaison(TypeMaison type);
 void afficherMaison(Maison* m, int pos_x, int pos_y);
 void destroyMaison(Maison* m);
+
+Porte* creerPorte(TypeMaison type);
+void destroyPorte(Porte* p);
 #endif //MAISON_H

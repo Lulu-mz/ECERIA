@@ -12,32 +12,31 @@
 
 Case chargerCase(int valeur, Case c, int i, int j) {
     c.vide = false;
+    c.maison = NULL;
+    c.grassLand = NULL;
+    c.porte = NULL;
+    c.marchable = false;
+
     if (valeur == 0) {
         c.grassLand = creerGrassLand(i, j, ARBRE);
-        c.marchable = false;
-        c.maison = NULL;
     } else if (valeur == 1) {
         c.grassLand = creerGrassLand(i, j, ROCHER);
-        c.marchable = false;
-        c.maison = NULL;
     } else if(valeur == 2) {
-        c.grassLand = NULL;
-        c.marchable = false;
-        c.maison = NULL;
         c.vide = true;
     } else if (valeur == 3) {
-        c.grassLand = NULL;
-        c.marchable = false;
         c.maison = creerMaison(MAISON_0);
     }
     else if (valeur == 4) {
-        c.grassLand = NULL;
-        c.marchable = false;
         c.maison = creerMaison(MAISON_1);
     }
+    else if (valeur == 10) {
+        c.porte = creerPorte(MAISON_0);
+    }
+    else if (valeur == 11) {
+        c.porte = creerPorte(MAISON_1);
+    }
     else {
-        c.grassLand = NULL;
-        c.maison = NULL;
+        c.marchable = true;
     }
     return c;
 }
@@ -138,6 +137,7 @@ Carte* creerCarte(int w, int h) {
             carte->map[i][j].marchable = true;
             carte->map[i][j].maison = NULL;
             carte->map[i][j].vide = false;
+            carte->map[i][j].porte = NULL;
 
             switch (valeur) {
                 case 0:
@@ -185,7 +185,10 @@ int saveCarte(Carte* carte, int pos_i, int pos_j) {
                 glType = carte->map[i][j].grassLand->type;
             }
             else if(carte->map[i][j].maison != NULL) {
-                glType = carte->map[i][j].maison->valeur;
+                glType = carte->map[i][j].maison->valeur; //soit 3 soit 4 : début pour le type de maison
+            }
+            else if(carte->map[i][j].porte != NULL) {
+                glType = carte->map[i][j].porte->val; //soit 10 soit 11 : pour porte double ou simple
             }
             else if(carte->map[i][j].vide == true) {
                 glType = 2;
@@ -211,7 +214,7 @@ void afficherCarte(Carte *carte) {
     for (int i = 0; i < carte->hauteur; i++) {
         for (int j = 0; j < carte->largeur; j++) {
             int imageL=16,imageH=16;
-            if(carte->map[i][j].vide == false) {
+            if(carte->map[i][j].vide == false && carte->map[i][j].porte == NULL) {
                 al_draw_rectangle(j*32,i*32,j*32+32,i*32+32,al_map_rgb(0,0,0),2 );
                 al_draw_scaled_bitmap(carte->map[i][j].image,0,0,imageL,imageH, j * carte->map[i][j].size, i * carte->map[i][j].size,carte->map[i][j].size,carte->map[i][j].size, 0);
             }
@@ -303,7 +306,7 @@ int isValidSpace(Carte* carte, int pos_x, int pos_y, Maison* m){
         for (int x = pos_x ; x < pos_x+m->largeur ; x++)
         {
             //Est ce que c'est libre
-            if (carte->map[y][x].grassLand != NULL || carte->map[y][x].maison != NULL || carte->map[y][x].vide == true) {
+            if (carte->map[y][x].grassLand != NULL || carte->map[y][x].maison != NULL || carte->map[y][x].vide == true || carte->map[y][x].porte != NULL) {
                 // Recommence
                 return 0;
             }
@@ -319,10 +322,13 @@ void genererMaisons(Carte* carte) {
     for(int i = 0; i < nbMaison; i++) {
         TypeMaison type = rand()%2;
         Maison * m = creerMaison(type);
+
         do {
             pos_x = rand()%((carte->largeur)-(m->largeur));
             pos_y = rand()%((carte->hauteur)-(m->hauteur));
         }while(!isValidSpace(carte, pos_x, pos_y, m));
+
+        Porte* p = creerPorte(type);
 
         for (int y = pos_y ; y < pos_y+m->hauteur ; y++)
         {
@@ -330,12 +336,16 @@ void genererMaisons(Carte* carte) {
                 if(y == pos_y && x == pos_x) {
                     carte->map[y][x] = chargerCase(m->valeur, carte->map[y][x], y, x);
                 }
+                else if ((x == p->x + pos_x && y == p->y + pos_y ) || (p->doubles == true && x == p->x + pos_x+1 && y == p->y + pos_y) ){
+                    carte->map[y][x] = chargerCase(p->val, carte->map[y][x], y, x);
+                }
                 else {
                     carte->map[y][x] = chargerCase(2, carte->map[y][x], y, x);
                 }
             }
         }
         destroyMaison(m);
+        destroyPorte(p);
     }
 }
 
@@ -347,7 +357,7 @@ void genererGrassLand(Carte* carte) {
         do {
             i = rand()%carte->hauteur;
             j = rand()%carte->largeur;
-        }while(carte->map[i][j].grassLand != NULL || carte->map[i][j].maison != NULL || carte->map[i][j].vide == true);
+        }while(carte->map[i][j].grassLand != NULL || carte->map[i][j].maison != NULL || carte->map[i][j].vide == true || carte->map[i][j].porte != NULL);
         GrassLandType type = rand() % 2; // 0 : arbre ou 1 : rocher
         carte->map[i][j] = chargerCase(type,carte->map[i][j], i, j);
     }

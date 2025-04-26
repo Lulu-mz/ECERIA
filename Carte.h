@@ -32,6 +32,7 @@ typedef struct c {
     GrassLand* grassLand;
     int size;
     Maison* maison;
+    Porte* porte;
 }Case;
 
 typedef struct carte {

@@ -33,6 +33,30 @@ Maison* creerMaison(TypeMaison type) {
     return m;
 }
 
+Porte* creerPorte(TypeMaison type) {
+    Porte* porte = malloc(1*sizeof(Porte));
+    porte->image = al_load_bitmap("../Assets/Houses/house.png");
+    if (!porte->image) {
+        printf("Erreur de chargement de l'image\n");
+        exit(1);
+    }
+    switch (type) {
+        case MAISON_0 :
+            porte->x = 1;
+            porte->y = 2;
+            porte->doubles = false;
+            porte->val = 10;
+        break;
+
+        case MAISON_1 :
+            porte->x = 2;
+            porte->y = 2;
+            porte->doubles = true;
+            porte->val = 11;
+        break;
+    }
+    return porte;
+}
 
 void afficherMaison(Maison* m, int pos_x, int pos_y) {
     int sw = 16;
@@ -54,6 +78,11 @@ void afficherMaison(Maison* m, int pos_x, int pos_y) {
         }
     }
     fclose(fichier);
+}
+
+void destroyPorte(Porte* p) {
+    free(p);
+    p = NULL;
 }
 
 void destroyMaison(Maison* m) {

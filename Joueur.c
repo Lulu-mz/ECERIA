@@ -124,8 +124,8 @@ void afficherJoueur(Joueur *joueur, int currentFrame) {
 void action(Joueur *joueur, Carte *carte) {
     int next_x = -1; //pour le joueur
     int next_y = -1; //pour le joueur
-    int next_x2 = -1; //pour l'arbre
-    int next_y2 = -1; //pour l'arbre
+    int next_x2 = -1; //si on est entre 2 cases
+    int next_y2 = -1; //si on est entre 2 cases
     switch (joueur->regard) {
         case RIGHT:
             next_x = (int) (joueur->x2 + joueur->speed) / TILE_SIZE; //on regarde la prochaine case où on va (joueur)
@@ -162,8 +162,14 @@ void action(Joueur *joueur, Carte *carte) {
     next_x2>=0 && next_x2< WIDTH/TILE_SIZE && next_y2 >=0 && next_y2 < HEIGHT/TILE_SIZE
         ) {
 
-        Item *i = taperGrassLand(carte, joueur, next_x, next_y, next_x2, next_y2);
-        ajouterItem(joueur->inventaire, i);
-        destroyItem(i);
+        if(carte->map[next_y][next_x].grassLand != NULL || carte->map[next_y2][next_x2].grassLand != NULL) {
+            Item *i = taperGrassLand(carte, joueur, next_x, next_y, next_x2, next_y2);
+            ajouterItem(joueur->inventaire, i);
+            destroyItem(i);
+        }
+
+        else if(carte->map[next_y][next_x].porte != NULL ||carte->map[next_y2][next_x2].porte != NULL){
+            //ouvrirPorte();
+        }
     }
 }
