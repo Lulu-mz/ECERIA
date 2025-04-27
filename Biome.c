@@ -32,6 +32,11 @@ GrassLand* creerGrassLand(int x, int y, GrassLandType type) {
             grass_land->h = 16;
             grass_land->w = 16;
             break;
+        // case ARBRE_F :
+        //     grass_land->sx = 52;
+        //     grass_land->sy = 0;
+        //     grass_land->h = 30;
+        //     grass_land->w = 23;
     }
 
     return grass_land;
@@ -53,6 +58,10 @@ void afficherGrassLand(GrassLand *gL, int pos_x, int pos_y) {
             x = pos_x * TILE_SIZE;
             y = pos_y * TILE_SIZE;
             break;
+        // case ARBRE_F :
+        //     x = pos_x * TILE_SIZE;
+        //     y = pos_y * TILE_SIZE;
+        // break;
     }
     // al_draw_bitmap_region(gL->image, gL->sx, gL->sy, gL->w, gL->h, x, y, 0);
     al_draw_scaled_bitmap(gL->image, gL->sx, gL->sy, gL->w, gL->h, x, y, gL->w*2, gL->h*2,0);

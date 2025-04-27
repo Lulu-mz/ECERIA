@@ -217,31 +217,6 @@ void afficherButton(ALLEGRO_BITMAP *buttonImg, ButtonState *btn) {
 }
 
 
-/*void afficherMenu(ALLEGRO_BITMAP* menu_background, ALLEGRO_BITMAP* button) {
-    al_draw_bitmap(menu_background, 0, 0, 0);
-
-    // Position des boutons
-    float button_width = 300;
-    float button_height = 80;
-    float button_x = (WIDTH - button_width) / 2.0f;
-    float first_button_y = 300;
-    float second_button_y = first_button_y + button_height + 30;
-
-    // Dessiner les deux boutons redimensionnés
-    al_draw_scaled_bitmap(button, 0, 0, 697, 337, button_x, first_button_y, button_width, button_height, 0);
-    al_draw_scaled_bitmap(button, 0, 0, 697, 337, button_x, second_button_y, button_width, button_height, 0);
-
-    // Affichage du texte
-    ALLEGRO_FONT *font = al_load_ttf_font("../Assets/Arial.ttf", 20, 0);
-    if (font) {
-        al_draw_text(font, al_map_rgb(0, 0, 0), WIDTH / 2, first_button_y + 20, ALLEGRO_ALIGN_CENTRE, "Nouvelle partie");
-        al_draw_text(font, al_map_rgb(0, 0, 0), WIDTH / 2, second_button_y + 20, ALLEGRO_ALIGN_CENTRE, "Charger une partie");
-        al_destroy_font(font);
-    } else {
-        fprintf(stderr, "Erreur lors de la création de la police.\n");
-    }
-}*/
-
 void afficherMenu(ALLEGRO_BITMAP* background, ALLEGRO_BITMAP* buttonImg,
                   ButtonState *btnNewGame, ButtonState *btnLoadGame) {
     al_draw_bitmap(background, 0, 0, 0);
@@ -321,59 +296,6 @@ Jeu* menu(ALLEGRO_EVENT_QUEUE *queue) {
     al_destroy_bitmap(buttonImg);
     return jeu;
 }
-
-
-// Jeu* menu(ALLEGRO_EVENT_QUEUE *queue) {
-//     ALLEGRO_BITMAP *background = al_load_bitmap("../Assets/background_2.jpg");
-//     ALLEGRO_BITMAP *button = al_load_bitmap("../Assets/button.png");
-//
-//     if (!background || !button) {
-//         fprintf(stderr, "Erreur de chargement d'image.\n");
-//         return NULL;
-//     }
-//
-//     Jeu* jeu = NULL;
-//
-//     bool in_menu = true;
-//
-//     while (in_menu) {
-//         afficherMenu(background, button);
-//         al_flip_display();
-//
-//         ALLEGRO_EVENT event;
-//         al_wait_for_event(queue, &event);
-//
-//         if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-//             jeu = NULL;
-//             in_menu = false;
-//         }
-//
-//         if (event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && event.mouse.button == 1) {
-//             int x = event.mouse.x;
-//             int y = event.mouse.y;
-//
-//             float button_width = 300;
-//             float button_height = 80;
-//             float button_x = (WIDTH - button_width) / 2.0f;
-//             float first_button_y = 300;
-//             float second_button_y = first_button_y + button_height + 30;
-//
-//             if (x >= button_x && x <= button_x + button_width &&
-//                 y >= first_button_y && y <= first_button_y + button_height) {
-//                 jeu = nouvellePartie();
-//                 in_menu = false;
-//                 } else if (x >= button_x && x <= button_x + button_width &&
-//                            y >= second_button_y && y <= second_button_y + button_height) {
-//                     jeu = chargerPartie();
-//                     in_menu = false;
-//                            }
-//         }
-//     }
-//
-//     al_destroy_bitmap(background);
-//     al_destroy_bitmap(button);
-//     return jeu;
-// }
 
 
 Jeu* nouvellePartie() {

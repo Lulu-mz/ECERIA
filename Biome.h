@@ -8,7 +8,8 @@
 
 typedef enum grassLandType {
     ARBRE,
-    ROCHER
+    ROCHER,
+    //ARBRE_F
 }GrassLandType;
 
 typedef struct grassLand {

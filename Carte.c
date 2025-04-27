@@ -21,7 +21,11 @@ Case chargerCase(int valeur, Case c, int i, int j) {
         c.grassLand = creerGrassLand(i, j, ARBRE);
     } else if (valeur == 1) {
         c.grassLand = creerGrassLand(i, j, ROCHER);
-    } else if(valeur == 2) {
+    }
+    // else if (valeur == 2) {
+    //     c.grassLand = creerGrassLand(i,j, ARBRE_F);
+    // }
+    else if(valeur == 2) {
         c.vide = true;
     } else if (valeur == 3) {
         c.maison = creerMaison(MAISON_0);
