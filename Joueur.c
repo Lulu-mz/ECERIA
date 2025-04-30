@@ -31,7 +31,7 @@ Joueur *createJoueur() {
     joueur->inventaire = creerInventaire();
     joueur->pos_i = MAP_SIZE/2; //position section carte
     joueur->pos_j = MAP_SIZE/2; //position section carte
-    joueur->inHouse = -1; //TODO : save in file
+    joueur->inHouse = -1;
 
     ALLEGRO_BITMAP *sprite_sheet = al_load_bitmap("../Assets/Cats/Characters/Character.png");
     if (!sprite_sheet) {
@@ -52,6 +52,7 @@ void saveJoueur(Joueur* joueur) {
     fprintf(joueurFile, "%f %f\n", joueur->sprite_x, joueur->sprite_y);
     fprintf(joueurFile, "%d %d\n", joueur->direction, joueur->regard);
     fprintf(joueurFile, "%d %d\n", joueur->pos_i, joueur->pos_j);
+    fprintf(joueurFile, "%d\n", joueur->inHouse);
 
     saveInventaire(joueur->inventaire);
 }
@@ -68,6 +69,7 @@ Joueur* chargerJoueur() {
     fscanf(joueurFile, "%f %f", &joueur->sprite_x, &joueur->sprite_y);
     fscanf(joueurFile, "%d %d", &joueur->direction, &joueur->regard);
     fscanf(joueurFile, "%d %d", &joueur->pos_i, &joueur->pos_j);
+    fscanf(joueurFile, "%d", &joueur->inHouse);
     joueur->x2 = joueur->x1 + joueur->l; //taille du personnage
     joueur->y2 = joueur->y1 + joueur->h; //taille du personnage
 
@@ -164,16 +166,8 @@ void action(Joueur *joueur, Carte *carte) {
         ) {
         actionGrassLand(carte,joueur, next_x, next_y);
         actionGrassLand(carte,joueur, next_x2, next_y2);
-        if(carte->map[next_y][next_x].porte != NULL) {
-            int y_maison = next_y-(carte->map[next_y][next_x].porte->y);
-            int x_maison = next_x-(carte->map[next_y][next_x].porte->x);
-            ouvrirPorte(carte, joueur, carte->map[y_maison][x_maison].maison->id);
-
-        }
-        if(carte->map[next_y2][next_x2].porte != NULL) {
-            //TODO : à faire
-
-        }
+        actionPorte(carte,joueur, next_x, next_y);
+        actionPorte(carte,joueur, next_x2, next_y2);
     }
 }
 
@@ -186,6 +180,10 @@ void ouvrirPorte(Carte* carte, Joueur* joueur, int id) {
         carte->carte_maison[id] = chargerInterieurMaison(carte->hauteur, carte->largeur,joueur->pos_i, joueur->pos_j, id);
     }
     joueur->inHouse = id;
+    joueur->x1 = WIDTH/2 + 4;
+    joueur->y1 = (carte->hauteur - 6)*TILE_SIZE;
+    joueur->x2 = joueur->x1 + joueur->l; //taille du personnage
+    joueur->y2 = joueur->y1 + joueur->h; //taille du personnage
 }
 
 void actionGrassLand(Carte* carte,Joueur* joueur, int x, int y) {
@@ -204,5 +202,41 @@ void actionGrassLand(Carte* carte,Joueur* joueur, int x, int y) {
         Item *i = taperGrassLand(carte, joueur, x, y);
         ajouterItem(joueur->inventaire, i);
         destroyItem(i);
+    }
+}
+
+
+void deplacerJoueurDevantMaison(Carte* carte, Joueur* joueur, int id_m) {
+    int nbM = 0;
+    for(int i = 0; i < carte->hauteur; i++) {
+        for(int j = 0; j < carte->largeur; j++) {
+            if(carte->map[i][j].maison != NULL) {
+                if(nbM == id_m) {
+                    if(i < carte->hauteur) {
+                        Porte* porte = creerPorte(carte->map[i][j].maison->type);
+                        joueur->x1 = (j + porte->x) * TILE_SIZE + 4;
+                        joueur->y1 = (i + porte->y + 1) * TILE_SIZE;
+                    }
+                    else {
+                        joueur->x1 = WIDTH/2 + 4;
+                        joueur->y1 = HEIGHT/2 + 4;
+                    }
+                    joueur->x2 = joueur->x1 + joueur->l; //taille du personnage
+                    joueur->y2 = joueur->y1 + joueur->h; //taille du personnage
+                }
+                nbM++;
+            }
+        }
+    }
+}
+
+void actionPorte(Carte* carte, Joueur* joueur, int x, int y) {
+    if(carte->map[y][x].porte != NULL) {
+        int y_maison = y-(carte->map[y][x].porte->y); //porte simple ou porte gauche
+        int x_maison = x-(carte->map[y][x].porte->x); //porte simple ou porte gauche
+        if(carte->map[y][x].porte->doubles == true && carte->map[y][x-1].porte != NULL) {
+            x_maison -=1;
+        } //si y'a une porte à gauche et que c'est double ==> c'est une porte de droite
+        ouvrirPorte(carte, joueur, carte->map[y_maison][x_maison].maison->id);
     }
 }

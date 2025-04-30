@@ -102,13 +102,19 @@ void deplacerJoueur(Jeu* jeu) {
                 joueur->y2 += joueur->speed;
             }
             if(next_y >= HEIGHT/TILE_SIZE) { //si on arrive au bord en bas d'une carte
-                if(jeu->joueur->pos_i + 1 < jeu->mapSize) { //si on arrive au bord du jeu
-                    if(jeu->sections[jeu->joueur->pos_i + 1][jeu->joueur->pos_j] == NULL) {
-                        jeu->sections[jeu->joueur->pos_i + 1][jeu->joueur->pos_j] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
+                if(jeu->joueur->inHouse != -1) { //si dans une maison
+                    deplacerJoueurDevantMaison(jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j], jeu->joueur, jeu->joueur->inHouse);
+                    jeu->joueur->inHouse = -1; //on sort de la maison
+                }
+                else {
+                    if(jeu->joueur->pos_i + 1 < jeu->mapSize) { //si on arrive au bord du jeu
+                        if(jeu->sections[jeu->joueur->pos_i + 1][jeu->joueur->pos_j] == NULL) {//si pas dans une maison, au bord de la carte, on crée une new carte
+                            jeu->sections[jeu->joueur->pos_i + 1][jeu->joueur->pos_j] = creerCarte(WIDTH/TILE_SIZE, HEIGHT /TILE_SIZE);
+                        }
+                        jeu->joueur->pos_i++;
+                        joueur->y1 = joueur->h;
+                        joueur->y2 = joueur->y1 + joueur->h; //hitbox
                     }
-                    jeu->joueur->pos_i++;
-                    joueur->y1 = joueur->h;
-                    joueur->y2 = joueur->y1 + joueur->h; //hitbox
                 }
             }
             break;
@@ -345,7 +351,7 @@ Jeu* chargerPartie() {
             jeu->sections[i][j] = chargerCarte(WIDTH / TILE_SIZE, HEIGHT / TILE_SIZE, i, j);
             if(jeu->sections[i][j] != NULL) {
                 for(int k = 0; k < jeu->sections[i][j]->nbMaison; k++) {
-                    jeu->sections[i][j]->carte_maison[k] = chargerInterieurMaison(WIDTH / TILE_SIZE, HEIGHT / TILE_SIZE, i, j, k);
+                    jeu->sections[i][j]->carte_maison[k] = chargerInterieurMaison(HEIGHT / TILE_SIZE, WIDTH / TILE_SIZE, i, j, k);
                     //on charge les k intérieur des maisons
                 }
             }

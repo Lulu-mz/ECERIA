@@ -57,8 +57,8 @@ int genererMaisons(Carte* carte);
 int compterMaison(Carte* carte, int pos_i, int pos_j);
 void genererGrassLand(Carte* carte);
 int isValidSpace(Carte* carte, int x, int y);
-Carte* genererInterieurMaison(int h, int w);
 void attribuateIDHouse(Carte* carte);
 void saveInterieurMaison(Carte* carte, int pos_i, int pos_j, int id);
 Carte* chargerInterieurMaison(int h, int w, int pos_i, int pos_j, int id);
+Carte* genererInterieurMaison(int h, int w);
 #endif //CARTE_H

@@ -426,34 +426,6 @@ void attribuateIDHouse(Carte* carte) {
     }
 }
 
-Carte* genererInterieurMaison(int h, int w) {
-    Carte *enfant = malloc(1*sizeof(Carte));
-    enfant->map = malloc(h * sizeof(Case *));
-    for (int i = 0; i < h; i++) {
-        enfant->map[i] = malloc(w * sizeof(Case));
-    }
-
-    enfant->largeur = w;
-    enfant->hauteur = h;
-
-    ALLEGRO_BITMAP* image = al_load_bitmap("../Assets/Houses/floor.png");
-
-    for(int i = 0; i < enfant->hauteur; i++) {
-        for(int j = 0; j < enfant->largeur; j++) {
-            enfant->map[i][j].maison = NULL;
-            enfant->map[i][j].marchable = true;
-            enfant->map[i][j].grassLand = NULL;
-            enfant->map[i][j].vide = false;
-            enfant->map[i][j].porte = NULL;
-            enfant->map[i][j].image = image;
-            enfant->map[i][j].size = TILE_SIZE;
-            enfant->map[i][j].sx = 16;
-            enfant->map[i][j].sy = 16;
-            enfant->map[i][j].typeCase = SOL;
-        }
-    }
-    return enfant;
-}
 
 void saveInterieurMaison(Carte* carte, int pos_i, int pos_j, int id) {
     char buffer[50];
@@ -499,7 +471,6 @@ Carte* chargerInterieurMaison(int h, int w, int pos_i, int pos_j, int id) {
     for(int i = 0; i < carteM->hauteur; i++) {
         for(int j = 0; j < carteM->largeur; j++) {
             carteM->map[i][j].maison = NULL;
-            carteM->map[i][j].marchable = true;
             carteM->map[i][j].grassLand = NULL;
             carteM->map[i][j].vide = false;
             carteM->map[i][j].porte = NULL;
@@ -516,13 +487,75 @@ Carte* chargerInterieurMaison(int h, int w, int pos_i, int pos_j, int id) {
                 carteM->map[i][j].sx = 16;
                 carteM->map[i][j].sy = 16;
                 carteM->map[i][j].typeCase = SOL;
+                carteM->map[i][j].marchable = true;
             }
             else if (valeur == 4) {
                 carteM->map[i][j].image = noir;
                 carteM->map[i][j].typeCase = NOIR;
+                carteM->map[i][j].marchable = false;
             }
         }
     }
     fclose(fichier);
     return carteM;
+}
+
+
+Carte* genererInterieurMaison(int h, int w) {
+    srand(time(NULL));
+    int marge_w = 0;
+    int marge_h = 0;
+    do {
+        marge_w = rand()%10;
+        marge_h = rand()%5;
+    }while(marge_w == 0 || marge_h == 0);
+
+    Carte *enfant = malloc(1*sizeof(Carte));
+    enfant->map = malloc(h * sizeof(Case *));
+    for (int i = 0; i < h; i++) {
+        enfant->map[i] = malloc(w * sizeof(Case));
+    }
+
+    enfant->largeur = w;
+    enfant->hauteur = h;
+
+    ALLEGRO_BITMAP* image = al_load_bitmap("../Assets/Houses/floor.png");
+    ALLEGRO_BITMAP* noir = al_load_bitmap("../Assets/Houses/noir.png");
+    if(!image || !noir) {
+        printf("Erreur de chargement d'image\n");
+        exit(1);
+    }
+
+    for(int i = 0; i < enfant->hauteur; i++) {
+        for(int j = 0; j < enfant->largeur; j++) {
+            enfant->map[i][j].maison = NULL;
+            enfant->map[i][j].grassLand = NULL;
+            enfant->map[i][j].vide = false;
+            enfant->map[i][j].porte = NULL;
+            enfant->map[i][j].size = TILE_SIZE;
+            enfant->map[i][j].marchable = false;
+            enfant->map[i][j].image = noir;
+            enfant->map[i][j].sx = 0;
+            enfant->map[i][j].sy = 0;
+            enfant->map[i][j].typeCase = NOIR;
+        }
+    }
+    for(int i = marge_h; i < enfant->hauteur - marge_h; i++) {
+        for(int j = marge_w; j < enfant->largeur - marge_w; j++) {
+            enfant->map[i][j].marchable = true;
+            enfant->map[i][j].image = image;
+            enfant->map[i][j].sx = 16;
+            enfant->map[i][j].sy = 16;
+            enfant->map[i][j].typeCase = SOL;
+        }
+    }
+    for(int i = enfant->hauteur - marge_h; i < enfant->hauteur; i++) {
+        int j = enfant->largeur/2;
+        enfant->map[i][j].marchable = true;
+        enfant->map[i][j].image = image;
+        enfant->map[i][j].sx = 16;
+        enfant->map[i][j].sy = 16;
+        enfant->map[i][j].typeCase = SOL;
+    }
+    return enfant;
 }
