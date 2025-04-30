@@ -17,6 +17,8 @@ typedef struct p {
     bool doubles;
     int val;
     ALLEGRO_BITMAP* image;
+    int x_maison;
+    int y_maison;
 }Porte;
 
 typedef  struct m {
@@ -25,6 +27,7 @@ typedef  struct m {
     ALLEGRO_BITMAP* image;
     TypeMaison type;
     int valeur;
+    int id;
 }Maison;
 
 Maison* creerMaison(TypeMaison type);

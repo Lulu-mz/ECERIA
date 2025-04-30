@@ -21,22 +21,33 @@ GrassLand* creerGrassLand(int x, int y, GrassLandType type) {
     grass_land->type = type;
     switch(grass_land->type) {
         case ARBRE :
+            grass_land->valeur = 0;
             grass_land->sx = 0;
             grass_land->sy = 0;
             grass_land->h = 32;
             grass_land->w = 16;
             break;
         case ROCHER :
+            grass_land->valeur = 1;
             grass_land->sx = 128;
             grass_land->sy = 16;
             grass_land->h = 16;
             grass_land->w = 16;
             break;
-        // case ARBRE_F :
-        //     grass_land->sx = 52;
-        //     grass_land->sy = 0;
-        //     grass_land->h = 30;
-        //     grass_land->w = 23;
+        case ARBRE_F_G :
+            grass_land->valeur = 2;
+            grass_land->sx = 48;
+            grass_land->sy = 0;
+            grass_land->h = 32;
+            grass_land->w = 16;
+        break;
+        case ARBRE_F_D :
+            grass_land->valeur = 6;
+            grass_land->sx = 64;
+            grass_land->sy = 0;
+            grass_land->h = 32;
+            grass_land->w = 16;
+        break;
     }
 
     return grass_land;
@@ -58,10 +69,14 @@ void afficherGrassLand(GrassLand *gL, int pos_x, int pos_y) {
             x = pos_x * TILE_SIZE;
             y = pos_y * TILE_SIZE;
             break;
-        // case ARBRE_F :
-        //     x = pos_x * TILE_SIZE;
-        //     y = pos_y * TILE_SIZE;
-        // break;
+        case ARBRE_F_G :
+            x = pos_x * TILE_SIZE;
+            y = (pos_y * TILE_SIZE) - TILE_SIZE;
+        break;
+        case ARBRE_F_D :
+            x = pos_x * TILE_SIZE;
+            y = (pos_y * TILE_SIZE) - TILE_SIZE;
+        break;
     }
     // al_draw_bitmap_region(gL->image, gL->sx, gL->sy, gL->w, gL->h, x, y, 0);
     al_draw_scaled_bitmap(gL->image, gL->sx, gL->sy, gL->w, gL->h, x, y, gL->w*2, gL->h*2,0);

@@ -47,6 +47,7 @@ void saveJeu(Jeu* jeu);
 void destroyJeu(Jeu* jeu);
 Jeu* nouvellePartie();
 Jeu* chargerPartie();
+Carte* getCurrentCarte(Jeu* jeu);
 //Joueur dans le jeu :
 void deplacerJoueur(Jeu* jeu);
 #endif //JEU_H

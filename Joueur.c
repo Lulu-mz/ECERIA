@@ -31,6 +31,7 @@ Joueur *createJoueur() {
     joueur->inventaire = creerInventaire();
     joueur->pos_i = MAP_SIZE/2; //position section carte
     joueur->pos_j = MAP_SIZE/2; //position section carte
+    joueur->inHouse = -1; //TODO : save in file
 
     ALLEGRO_BITMAP *sprite_sheet = al_load_bitmap("../Assets/Cats/Characters/Character.png");
     if (!sprite_sheet) {
@@ -161,15 +162,47 @@ void action(Joueur *joueur, Carte *carte) {
     if(next_x>=0 && next_x< WIDTH/TILE_SIZE && next_y >=0 && next_y < HEIGHT/TILE_SIZE &&
     next_x2>=0 && next_x2< WIDTH/TILE_SIZE && next_y2 >=0 && next_y2 < HEIGHT/TILE_SIZE
         ) {
+        actionGrassLand(carte,joueur, next_x, next_y);
+        actionGrassLand(carte,joueur, next_x2, next_y2);
+        if(carte->map[next_y][next_x].porte != NULL) {
+            int y_maison = next_y-(carte->map[next_y][next_x].porte->y);
+            int x_maison = next_x-(carte->map[next_y][next_x].porte->x);
+            ouvrirPorte(carte, joueur, carte->map[y_maison][x_maison].maison->id);
 
-        if(carte->map[next_y][next_x].grassLand != NULL || carte->map[next_y2][next_x2].grassLand != NULL) {
-            Item *i = taperGrassLand(carte, joueur, next_x, next_y, next_x2, next_y2);
+        }
+        if(carte->map[next_y2][next_x2].porte != NULL) {
+            //TODO : à faire
+
+        }
+    }
+}
+
+void ouvrirPorte(Carte* carte, Joueur* joueur, int id) {
+    if(carte->carte_maison[id] == NULL) {
+        carte->carte_maison[id] = genererInterieurMaison(carte->hauteur, carte->largeur);
+        saveInterieurMaison(carte->carte_maison[id], joueur->pos_i, joueur->pos_j, id);
+    }
+    else {
+        carte->carte_maison[id] = chargerInterieurMaison(carte->hauteur, carte->largeur,joueur->pos_i, joueur->pos_j, id);
+    }
+    joueur->inHouse = id;
+}
+
+void actionGrassLand(Carte* carte,Joueur* joueur, int x, int y) {
+    if(carte->map[y][x].grassLand != NULL) { //en x2 et en y2 du perso
+        if(carte->map[y][x].grassLand->type == ARBRE_F_G && carte->map[y][x+1].grassLand != NULL) {
+            Item *i = taperGrassLand(carte, joueur, x+1, y);
             ajouterItem(joueur->inventaire, i);
             destroyItem(i);
         }
-
-        else if(carte->map[next_y][next_x].porte != NULL ||carte->map[next_y2][next_x2].porte != NULL){
-            //ouvrirPorte();
+        else if(carte->map[y][x].grassLand->type == ARBRE_F_D && carte->map[y][x-1].grassLand != NULL) {
+            Item *i = taperGrassLand(carte, joueur, x-1, y);
+            ajouterItem(joueur->inventaire, i);
+            destroyItem(i);
         }
+        //si j'ai un autre gl
+        Item *i = taperGrassLand(carte, joueur, x, y);
+        ajouterItem(joueur->inventaire, i);
+        destroyItem(i);
     }
 }

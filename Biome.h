@@ -9,7 +9,8 @@
 typedef enum grassLandType {
     ARBRE,
     ROCHER,
-    //ARBRE_F
+    ARBRE_F_G,
+    ARBRE_F_D
 }GrassLandType;
 
 typedef struct grassLand {
@@ -19,6 +20,7 @@ typedef struct grassLand {
     GrassLandType type;
     int sx, sy;
     int h, w;
+    int valeur;
 }GrassLand;
 
 GrassLand* creerGrassLand(int x, int y, GrassLandType type);

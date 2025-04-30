@@ -25,7 +25,7 @@ void registerEventSource(ALLEGRO_DISPLAY *display, ALLEGRO_TIMER *timer, ALLEGRO
 
 void deplacerJoueur(Jeu* jeu) {
     Joueur* joueur = jeu->joueur;
-    Carte* carte = jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j];
+    Carte* carte = getCurrentCarte(jeu);
     int next_x; //position en x à la prochaine case
     int next_y; //position en x à la prochaine case
     switch (joueur->direction) {
@@ -146,6 +146,7 @@ int animation() {
     bool running = true;
 
     while (running) {
+        Carte* carte = getCurrentCarte(jeu);
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
         al_get_keyboard_state(&keyboard_state);
@@ -155,11 +156,11 @@ int animation() {
         }
 
         if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_E) {
-            action(jeu->joueur, jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j]);
+            action(jeu->joueur, carte);
         }
 
         if (event.type == ALLEGRO_EVENT_TIMER) {
-            afficherCarte(jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j]);
+            afficherCarte(carte);
             afficherJoueur(jeu->joueur, currentFrame);
             al_flip_display();
         }
@@ -195,6 +196,12 @@ int animation() {
     return 0;
 }
 
+Carte* getCurrentCarte(Jeu* jeu) {
+    if(jeu->joueur->inHouse == -1) {
+        return (jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j]);
+    }
+    return (jeu->sections[jeu->joueur->pos_i][jeu->joueur->pos_j]->carte_maison[jeu->joueur->inHouse]);
+}
 
 void afficherButton(ALLEGRO_BITMAP *buttonImg, ButtonState *btn) {
     float drawX = btn->x - ((btn->scale - 1.0f) * btn->width / 2.0f);
@@ -308,6 +315,10 @@ Jeu* nouvellePartie() {
     char buffer[50];
     for(int i = 0; i < jeu->mapSize; i++) {
         for(int j = 0; j < jeu->mapSize; j++) {
+            for(int k = 0; k < 5; k++) {
+                sprintf(buffer, "../Save/house_%d_%d_%d.txt",i,j,k);
+                remove(buffer);
+            }
             jeu->sections[i][j] = NULL;
             sprintf(buffer, "../Save/map_%d_%d.txt",i,j);
             remove(buffer);
@@ -332,6 +343,12 @@ Jeu* chargerPartie() {
     for(int i = 0; i < jeu->mapSize; i++) {
         for(int j = 0; j < jeu->mapSize; j++) {
             jeu->sections[i][j] = chargerCarte(WIDTH / TILE_SIZE, HEIGHT / TILE_SIZE, i, j);
+            if(jeu->sections[i][j] != NULL) {
+                for(int k = 0; k < jeu->sections[i][j]->nbMaison; k++) {
+                    jeu->sections[i][j]->carte_maison[k] = chargerInterieurMaison(WIDTH / TILE_SIZE, HEIGHT / TILE_SIZE, i, j, k);
+                    //on charge les k intérieur des maisons
+                }
+            }
         }
     }
     jeu->joueur = chargerJoueur();
@@ -345,10 +362,16 @@ void saveJeu(Jeu* jeu) {
         for(int j = 0; j < jeu->mapSize; j++) {
             if(jeu->sections[i][j] != NULL) {
                 saveCarte(jeu->sections[i][j], i, j);
+                for(int k = 0; k < jeu->sections[i][j]->nbMaison; k++) {
+                    if(jeu->sections[i][j]->carte_maison[k] != NULL) {
+                        saveInterieurMaison(jeu->sections[i][j]->carte_maison[k], i, j, k);
+                    }
+                }
             }
         }
     }
 }
+
 
 void destroyJeu(Jeu* jeu) {
     destroyJoueur(jeu->joueur);

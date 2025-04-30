@@ -33,6 +33,7 @@ typedef struct j {
     Inventaire* inventaire;
     int pos_i; //positions section
     int pos_j; //positions section
+    int inHouse;
 }Joueur;
 
 Joueur* createJoueur();
@@ -42,5 +43,7 @@ void destroyJoueur(Joueur* joueur);
 void afficherJoueur(Joueur* joueur, int curentFrame);
 void action(Joueur* joueur, Carte* carte);
 void destroyInventaire(Inventaire* inv);
-Item* taperGrassLand(Carte* carte, Joueur* joueur, int x, int y, int x2, int y2);
+Item* taperGrassLand(Carte* carte, Joueur* joueur, int x, int y);
+void actionGrassLand(Carte* carte,Joueur* joueur, int x, int y);
+void ouvrirPorte(Carte* carte, Joueur* joueur, int id);
 #endif //JOUEUR_H

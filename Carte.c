@@ -22,10 +22,13 @@ Case chargerCase(int valeur, Case c, int i, int j) {
     } else if (valeur == 1) {
         c.grassLand = creerGrassLand(i, j, ROCHER);
     }
-    // else if (valeur == 2) {
-    //     c.grassLand = creerGrassLand(i,j, ARBRE_F);
-    // }
-    else if(valeur == 2) {
+    else if (valeur == 2) {
+        c.grassLand = creerGrassLand(i,j, ARBRE_F_G);
+    }
+    else if (valeur == 6) {
+        c.grassLand = creerGrassLand(i,j, ARBRE_F_D);
+    }
+    else if(valeur == 5) {
         c.vide = true;
     } else if (valeur == 3) {
         c.maison = creerMaison(MAISON_0);
@@ -64,6 +67,7 @@ Carte *chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j) {
     ALLEGRO_BITMAP *herbe = al_load_bitmap("../Assets/Tiles/tile_0000.png");
     ALLEGRO_BITMAP *herbe2 = al_load_bitmap("../Assets/Tiles/tile_0001.png");
     ALLEGRO_BITMAP *fleur = al_load_bitmap("../Assets/Tiles/tile_0002.png");
+    ALLEGRO_BITMAP *sol = al_load_bitmap("../Assets/Houses/floor.png");
     if (!herbe || !herbe2 || !fleur) {
         printf("Erreur de chargement de l'image\n");
         exit(1);
@@ -81,6 +85,8 @@ Carte *chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j) {
             carte->map[i][j].grassLand = NULL;
             carte->map[i][j].size = TILE_SIZE;
             carte->map[i][j].marchable = true;
+            carte->map[i][j].sx = 0;
+            carte->map[i][j].sy = 0;
 
             switch (valeur) {
                 case 0:
@@ -95,6 +101,11 @@ Carte *chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j) {
                     carte->map[i][j].typeCase = FLEUR;
                     carte->map[i][j].image = fleur;
                     break;
+                case 3:
+                    carte->map[i][j].typeCase = SOL;
+                    carte->map[i][j].image = sol;
+                    carte->map[i][j].sx = 16;
+                    carte->map[i][j].sy = 16;
                 default:
                     printf("Valeur inconnue %d dans map.txt à la position (%d, %d)\n", valeur, i, j);
                     fclose(fichier);
@@ -107,7 +118,10 @@ Carte *chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j) {
     carte->largeur = mapWidth;
     carte->hauteur = mapHeight;
 
-    chargerGrassLand(carte, pos_i, pos_j);
+    chargerBiome(carte, pos_i, pos_j);
+    carte->nbMaison = compterMaison(carte, pos_i, pos_j);
+    attribuateIDHouse(carte);
+    carte->carte_maison = malloc(carte->nbMaison*sizeof(Carte*));
 
     return carte;
 }
@@ -142,6 +156,8 @@ Carte* creerCarte(int w, int h) {
             carte->map[i][j].maison = NULL;
             carte->map[i][j].vide = false;
             carte->map[i][j].porte = NULL;
+            carte->map[i][j].sx = 0;
+            carte->map[i][j].sy = 0;
 
             switch (valeur) {
                 case 0:
@@ -150,11 +166,11 @@ Carte* creerCarte(int w, int h) {
                 break;
                 case 1:
                     carte->map[i][j].typeCase = HERBE2;
-                carte->map[i][j].image = herbe2;
+                    carte->map[i][j].image = herbe2;
                 break;
                 case 2:
                     carte->map[i][j].typeCase = FLEUR;
-                carte->map[i][j].image = fleur;
+                    carte->map[i][j].image = fleur;
                 break;
                 default:
                     printf("Valeur inconnue %d dans map.txt à la position (%d, %d)\n", valeur, i, j);
@@ -162,7 +178,12 @@ Carte* creerCarte(int w, int h) {
             }
         }
     }
-    genererMaisons(carte);
+    carte->nbMaison = genererMaisons(carte);
+    attribuateIDHouse(carte);
+    carte->carte_maison = malloc(carte->nbMaison*sizeof(Carte*));
+    for(int k = 0; k < carte->nbMaison; k++) {
+        carte->carte_maison[k] = NULL;
+    }
     genererGrassLand(carte);
     return carte;
 }
@@ -186,7 +207,7 @@ int saveCarte(Carte* carte, int pos_i, int pos_j) {
 
             int glType = -1; //il n'y a pas de grassLand
             if(carte->map[i][j].grassLand != NULL) { //égal à null par défaut => pas de grassLand
-                glType = carte->map[i][j].grassLand->type;
+                glType = carte->map[i][j].grassLand->valeur;
             }
             else if(carte->map[i][j].maison != NULL) {
                 glType = carte->map[i][j].maison->valeur; //soit 3 soit 4 : début pour le type de maison
@@ -195,7 +216,7 @@ int saveCarte(Carte* carte, int pos_i, int pos_j) {
                 glType = carte->map[i][j].porte->val; //soit 10 soit 11 : pour porte double ou simple
             }
             else if(carte->map[i][j].vide == true) {
-                glType = 2;
+                glType = 5;
             }
             fprintf(grassLandFile, "%d", glType);
 
@@ -220,7 +241,7 @@ void afficherCarte(Carte *carte) {
             int imageL=16,imageH=16;
             if(carte->map[i][j].vide == false && carte->map[i][j].porte == NULL) {
                 al_draw_rectangle(j*32,i*32,j*32+32,i*32+32,al_map_rgb(0,0,0),2 );
-                al_draw_scaled_bitmap(carte->map[i][j].image,0,0,imageL,imageH, j * carte->map[i][j].size, i * carte->map[i][j].size,carte->map[i][j].size,carte->map[i][j].size, 0);
+                al_draw_scaled_bitmap(carte->map[i][j].image,carte->map[i][j].sx,carte->map[i][j].sy,imageL,imageH, j * carte->map[i][j].size, i * carte->map[i][j].size,carte->map[i][j].size,carte->map[i][j].size, 0);
             }
             if (carte->map[i][j].grassLand != NULL) {
                 afficherGrassLand(carte->map[i][j].grassLand, j, i); //Inversé
@@ -234,6 +255,8 @@ void afficherCarte(Carte *carte) {
 
 
 void destroyCarte(Carte *carte) {
+    free(carte->carte_maison);
+    carte->carte_maison = NULL;
     for (int i = 0; i < carte->hauteur; i++) {
         free(carte->map[i]);
     }
@@ -242,8 +265,28 @@ void destroyCarte(Carte *carte) {
     carte = NULL;
 }
 
+int compterMaison(Carte* carte, int pos_i, int pos_j) {
+    int nbM = 0;
+    char buffer[20];
+    sprintf(buffer,"../Save/biome_%d_%d.txt", pos_i, pos_j);
+    FILE *fichier = fopen(buffer, "r");
+    if (!fichier) {
+        perror("Erreur ouverture fichier biome.txt");
+        exit(EXIT_FAILURE);
+    }
+    for(int i = 0; i < carte->hauteur; i++) {
+        for(int j = 0; j < carte->largeur; j++) {
+            int valeur = -1;
+            fscanf(fichier, "%d", &valeur);
+            if (valeur == 3 || valeur == 4) {
+                nbM++;
+            }
+        }
+    }
+    return nbM;
+}
 
-void chargerGrassLand(Carte* carte, int pos_i, int pos_j) {
+void chargerBiome(Carte* carte, int pos_i, int pos_j) {
     char buffer[20];
     sprintf(buffer,"../Save/biome_%d_%d.txt", pos_i, pos_j);
     FILE *fichier = fopen(buffer, "r");
@@ -268,49 +311,41 @@ void chargerGrassLand(Carte* carte, int pos_i, int pos_j) {
 }
 
 
+Item* taperGrassLand(Carte* carte, Joueur* joueur, int x, int y) {
 
-//TODO : call twice instead of array
-Item* taperGrassLand(Carte* carte, Joueur* joueur, int x, int y, int x2, int y2) {
-    int aimedCase = 1;
+    GrassLand* grass_land = carte->map[y][x].grassLand;
     int nb_items = 0;
     TypeItem type_item = BOIS;
-    GrassLand* grass_lands[2];
-    grass_lands[0] = carte->map[y][x].grassLand;
-    if (x!=x2 || y !=y2) {
-        grass_lands[1] = carte->map[y2][x2].grassLand;
-        aimedCase = 2;
-    }
-    for(int i = 0; i<aimedCase; i++) {
-        if (grass_lands[i]!=NULL) {
-            //on regarde si y'a un gl
-            grass_lands[i]->pointsVie -= joueur->degats;
-            type_item = grass_lands[i]->type;
-            //bois (item) = type grass_land: arbre
-            //pierre (item) = type grass_land: rocher
-            nb_items+=5;
-            if (grass_lands[i]->pointsVie <= 0) {
-                nb_items+=10;
-                carte->map[grass_lands[i]->x][grass_lands[i]->y].marchable = true;
-                carte->map[grass_lands[i]->x][grass_lands[i]->y].grassLand = NULL;
-                destroyGrassLand(grass_lands[i]);
-                grass_lands[i] = NULL;
 
-            }
+    if (grass_land !=NULL) {
+        grass_land->pointsVie -= joueur->degats;
+        type_item = grass_land->type;
+        if(grass_land->type == ARBRE_F_D) {
+            type_item = BOIS;
+        }
+        nb_items+=5;
+        if (grass_land->pointsVie <= 0) {
+            nb_items+=10;
+            carte->map[grass_land->x][grass_land->y].marchable = true;
+            carte->map[grass_land->x][grass_land->y].grassLand = NULL;
+            destroyGrassLand(grass_land);
+            grass_land = NULL;
         }
     }
+
     Item * to_add = creerItem(type_item);
     to_add->nb = nb_items;
     return to_add;
 }
 
 
-int isValidSpace(Carte* carte, int pos_x, int pos_y, Maison* m){
+int isValidSpaceForHouses(Carte* carte, int pos_x, int pos_y, Maison* m){
     for (int y = pos_y ; y < pos_y+m->hauteur ; y++)
     {
         for (int x = pos_x ; x < pos_x+m->largeur ; x++)
         {
             //Est ce que c'est libre
-            if (carte->map[y][x].grassLand != NULL || carte->map[y][x].maison != NULL || carte->map[y][x].vide == true || carte->map[y][x].porte != NULL) {
+            if (isValidSpace(carte, pos_x, pos_y) == 0) {
                 // Recommence
                 return 0;
             }
@@ -319,7 +354,14 @@ int isValidSpace(Carte* carte, int pos_x, int pos_y, Maison* m){
     return 1;
 }
 
-void genererMaisons(Carte* carte) {
+int isValidSpace(Carte* carte, int x, int y) {
+    if(carte->map[y][x].grassLand != NULL || carte->map[y][x].maison != NULL || carte->map[y][x].vide == true || carte->map[y][x].porte != NULL) {
+        return 0;
+    }
+    return 1;
+}
+
+int genererMaisons(Carte* carte) {
     srand(time(NULL));
     int pos_x, pos_y;
     int nbMaison = rand()%5;
@@ -330,7 +372,7 @@ void genererMaisons(Carte* carte) {
         do {
             pos_x = rand()%((carte->largeur)-(m->largeur));
             pos_y = rand()%((carte->hauteur)-(m->hauteur));
-        }while(!isValidSpace(carte, pos_x, pos_y, m));
+        }while(!isValidSpaceForHouses(carte, pos_x, pos_y, m));
 
         Porte* p = creerPorte(type);
 
@@ -344,13 +386,14 @@ void genererMaisons(Carte* carte) {
                     carte->map[y][x] = chargerCase(p->val, carte->map[y][x], y, x);
                 }
                 else {
-                    carte->map[y][x] = chargerCase(2, carte->map[y][x], y, x);
+                    carte->map[y][x] = chargerCase(5, carte->map[y][x], y, x);
                 }
             }
         }
         destroyMaison(m);
         destroyPorte(p);
     }
+    return nbMaison;
 }
 
 void genererGrassLand(Carte* carte) {
@@ -358,11 +401,128 @@ void genererGrassLand(Carte* carte) {
     int i, j;
     int nbGrassLand = rand()%20;
     for(int k = 0; k<nbGrassLand; k++){
+        GrassLandType type = rand() % 3; // 0 : arbre ou 1 : rocher ou 2 : arbre fruit
         do {
             i = rand()%carte->hauteur;
             j = rand()%carte->largeur;
-        }while(carte->map[i][j].grassLand != NULL || carte->map[i][j].maison != NULL || carte->map[i][j].vide == true || carte->map[i][j].porte != NULL);
-        GrassLandType type = rand() % 2; // 0 : arbre ou 1 : rocher
+        }while(isValidSpace(carte, j, i) == 0 || (type == ARBRE_F_G && isValidSpace(carte, j+1, i) == 0));
         carte->map[i][j] = chargerCase(type,carte->map[i][j], i, j);
+        if(type == ARBRE_F_G) {
+            carte->map[i][j+1] = chargerCase(6,carte->map[i][j+1], i, j+1);
+        }
     }
+}
+
+void attribuateIDHouse(Carte* carte) {
+    int nbMaison = 0;
+    for(int i = 0; i < carte->hauteur; i++) {
+      for(int j = 0; j < carte->largeur; j++) {
+          if(carte->map[i][j].maison != NULL) {
+              carte->map[i][j].maison->id = nbMaison;
+              nbMaison++;
+          }
+
+      }
+    }
+}
+
+Carte* genererInterieurMaison(int h, int w) {
+    Carte *enfant = malloc(1*sizeof(Carte));
+    enfant->map = malloc(h * sizeof(Case *));
+    for (int i = 0; i < h; i++) {
+        enfant->map[i] = malloc(w * sizeof(Case));
+    }
+
+    enfant->largeur = w;
+    enfant->hauteur = h;
+
+    ALLEGRO_BITMAP* image = al_load_bitmap("../Assets/Houses/floor.png");
+
+    for(int i = 0; i < enfant->hauteur; i++) {
+        for(int j = 0; j < enfant->largeur; j++) {
+            enfant->map[i][j].maison = NULL;
+            enfant->map[i][j].marchable = true;
+            enfant->map[i][j].grassLand = NULL;
+            enfant->map[i][j].vide = false;
+            enfant->map[i][j].porte = NULL;
+            enfant->map[i][j].image = image;
+            enfant->map[i][j].size = TILE_SIZE;
+            enfant->map[i][j].sx = 16;
+            enfant->map[i][j].sy = 16;
+            enfant->map[i][j].typeCase = SOL;
+        }
+    }
+    return enfant;
+}
+
+void saveInterieurMaison(Carte* carte, int pos_i, int pos_j, int id) {
+    char buffer[50];
+    sprintf(buffer,"../Save/house_%d_%d_%d.txt",pos_i, pos_j, id);
+    FILE* fichier = fopen(buffer, "w");
+    for(int i = 0; i < carte->hauteur; i++) {
+        for(int j = 0; j < carte->largeur; j++) {
+            fprintf(fichier, "%d", carte->map[i][j].typeCase);
+            if(j < carte->largeur-1) {
+                fprintf(fichier," ");
+            }
+        }
+        fprintf(fichier, "\n");
+    }
+    fclose(fichier);
+}
+
+
+Carte* chargerInterieurMaison(int h, int w, int pos_i, int pos_j, int id) {
+    char buffer[50];
+    sprintf(buffer,"../Save/house_%d_%d_%d.txt",pos_i, pos_j, id);
+    FILE *fichier = fopen(buffer, "r");
+    if (!fichier) {
+        return NULL;
+    }
+
+    Carte *carteM = malloc(1*sizeof(Carte));
+    carteM->map = malloc(h * sizeof(Case *));
+    for (int i = 0; i < h; i++) {
+        carteM->map[i] = malloc(w * sizeof(Case));
+    }
+
+    carteM->largeur = w;
+    carteM->hauteur = h;
+
+    ALLEGRO_BITMAP* floor = al_load_bitmap("../Assets/Houses/floor.png");
+    ALLEGRO_BITMAP* noir = al_load_bitmap("../Assets/Houses/noir.png");
+    if (!floor) {
+        printf("Erreur de chargement de l'image\n");
+        exit(1);
+    }
+
+    for(int i = 0; i < carteM->hauteur; i++) {
+        for(int j = 0; j < carteM->largeur; j++) {
+            carteM->map[i][j].maison = NULL;
+            carteM->map[i][j].marchable = true;
+            carteM->map[i][j].grassLand = NULL;
+            carteM->map[i][j].vide = false;
+            carteM->map[i][j].porte = NULL;
+            carteM->map[i][j].image = NULL;
+            carteM->map[i][j].size = TILE_SIZE;
+            carteM->map[i][j].sx = 0;
+            carteM->map[i][j].sy = 0;
+
+            int valeur = -1;
+            fscanf(fichier, "%d", &valeur);
+
+            if(valeur == 3) {
+                carteM->map[i][j].image = floor;
+                carteM->map[i][j].sx = 16;
+                carteM->map[i][j].sy = 16;
+                carteM->map[i][j].typeCase = SOL;
+            }
+            else if (valeur == 4) {
+                carteM->map[i][j].image = noir;
+                carteM->map[i][j].typeCase = NOIR;
+            }
+        }
+    }
+    fclose(fichier);
+    return carteM;
 }

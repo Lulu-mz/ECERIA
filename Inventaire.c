@@ -28,6 +28,11 @@ Item *creerItem(TypeItem type) {
             item->sx = 0;
             item->sy = 16;
         break;
+
+        case FRUIT :
+            item->image = al_load_bitmap("../Assets/Cats/Objects/biome.png");
+            item->sx = 32;
+            item->sy = 32;
     }
     return item;
 }

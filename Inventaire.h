@@ -9,7 +9,7 @@
 
 
 typedef enum typeItem {
-    BOIS, PIERRE
+    BOIS, PIERRE, FRUIT
 }TypeItem;
 
 typedef struct item {

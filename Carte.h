@@ -21,7 +21,9 @@
 typedef enum type {
     HERBE,
     HERBE2,
-    FLEUR
+    FLEUR,
+    SOL,
+    NOIR,
 } Type;
 
 typedef struct c {
@@ -33,20 +35,30 @@ typedef struct c {
     int size;
     Maison* maison;
     Porte* porte;
+    int sx;
+    int sy;
 }Case;
 
 typedef struct carte {
     Case** map;
     int largeur;
     int hauteur;
+    struct carte** carte_maison;
+    int nbMaison;
 }Carte;
 
 Carte* chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j);
 void afficherCarte(Carte* carte);
 void destroyCarte(Carte* carte);
-void chargerGrassLand(Carte* carte, int pos_i, int pos_j);
+void chargerBiome(Carte* carte, int pos_i, int pos_j);
 Carte* creerCarte(int w, int h);
 int saveCarte(Carte* carte, int pos_i, int pos_j);
-void genererMaisons(Carte* carte);
+int genererMaisons(Carte* carte);
+int compterMaison(Carte* carte, int pos_i, int pos_j);
 void genererGrassLand(Carte* carte);
+int isValidSpace(Carte* carte, int x, int y);
+Carte* genererInterieurMaison(int h, int w);
+void attribuateIDHouse(Carte* carte);
+void saveInterieurMaison(Carte* carte, int pos_i, int pos_j, int id);
+Carte* chargerInterieurMaison(int h, int w, int pos_i, int pos_j, int id);
 #endif //CARTE_H
