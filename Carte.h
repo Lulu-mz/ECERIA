@@ -24,6 +24,7 @@ typedef enum type {
     FLEUR,
     SOL,
     NOIR,
+    EAU
 } Type;
 
 typedef struct c {
@@ -55,6 +56,7 @@ Carte* creerCarte(int w, int h);
 int saveCarte(Carte* carte, int pos_i, int pos_j);
 int genererMaisons(Carte* carte);
 int compterMaison(Carte* carte, int pos_i, int pos_j);
+void genererLac(Carte* carte);
 void genererGrassLand(Carte* carte);
 int isValidSpace(Carte* carte, int x, int y);
 void attribuateIDHouse(Carte* carte);
