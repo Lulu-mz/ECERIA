@@ -13,6 +13,10 @@ void installation() {
     al_init_image_addon();
     al_init_font_addon();
     al_init_ttf_addon();
+
+    al_install_audio();
+    al_init_acodec_addon();
+    al_reserve_samples(1);
 }
 
 void registerEventSource(ALLEGRO_DISPLAY *display, ALLEGRO_TIMER *timer, ALLEGRO_EVENT_QUEUE *queue) {
@@ -129,11 +133,28 @@ int animation() {
     installation();
 
     ALLEGRO_DISPLAY *window = al_create_display(WIDTH, HEIGHT);
+    if(!window) {
+        fprintf(stderr, "Erreur : Impossible de creer la fenetre.\n");
+        return -1;
+    }
+
+    ALLEGRO_SAMPLE* sample = NULL;
+
     ALLEGRO_EVENT_QUEUE *queue = al_create_event_queue();
+    if (!queue) {
+        fprintf(stderr, "Erreur : Impossible de creer la file d'evenements.\n");
+        cleanUp(NULL, NULL, window, NULL, sample);
+        return -1;
+    }
+
     ALLEGRO_TIMER *timer = al_create_timer(1.0 / 60);
+    if (!timer) {
+        fprintf(stderr, "Erreur : Impossible de creer le timer.\n");
+        cleanUp(NULL, queue, window, NULL, sample);
+        return -1;
+    }
 
     registerEventSource(window, timer, queue);
-
     al_start_timer(timer);
 
     ALLEGRO_KEYBOARD_STATE keyboard_state;
@@ -141,12 +162,18 @@ int animation() {
     int currentFrame = 0;
     int frameTime = 0;
 
-    Jeu* jeu = menu(queue); // Chargement du menu + carte choisie
+    Jeu* jeu = menu(queue);  // Chargement du menu + carte choisie
     if (!jeu) {
-        al_destroy_timer(timer);
-        al_destroy_event_queue(queue);
-        al_destroy_display(window);
-        return 0;
+        fprintf(stderr, "Erreur : Chargement du jeu échoué.\n");
+        cleanUp(timer, queue, window, NULL, sample);
+        return -1;
+    }
+
+    // Initialisation audio
+    if (!al_install_audio() || !al_init_acodec_addon()) {
+        fprintf(stderr, "Erreur d'initialisation audio.\n");
+        cleanUp(timer, queue, window, jeu, sample);
+        return;
     }
 
     bool running = true;
@@ -185,6 +212,8 @@ int animation() {
         }
 
         deplacerJoueur(jeu);
+        playSound(jeu);
+
         frameTime += 16;
         if (frameTime >= 600) {
             currentFrame = (currentFrame + 1) % 2;
@@ -193,11 +222,7 @@ int animation() {
     }
 
     saveJeu(jeu);
-    destroyJeu(jeu);
-
-    al_destroy_timer(timer);
-    al_destroy_event_queue(queue);
-    al_destroy_display(window);
+    cleanUp(timer, queue, window, jeu, sample);
 
     return 0;
 }
@@ -394,3 +419,30 @@ void destroyJeu(Jeu* jeu) {
     free(jeu->sections);
     free(jeu);
 }
+
+int playSound(Jeu* jeu) {
+    if (jeu == NULL || jeu->joueur == NULL || jeu->joueur->direction == STATIQUE) {
+        return 1;
+    }
+
+    ALLEGRO_SAMPLE *sample = al_load_sample("../Sounds/walking_on_grass_2.wav");
+    if (!sample) {
+        fprintf(stderr, "Impossible de charger le fichier wav\n");
+        return 1;
+    }
+
+    al_play_sample(sample, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+    return 0;
+}
+
+void cleanUp(ALLEGRO_TIMER *timer, ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_DISPLAY *window, Jeu *jeu, ALLEGRO_SAMPLE *sample) {
+    if (jeu) destroyJeu(jeu);
+    if (timer) al_destroy_timer(timer);
+    if (queue) al_destroy_event_queue(queue);
+    if (window) al_destroy_display(window);
+    if (sample) al_destroy_sample(sample);
+
+    // Important : désinstaller l'audio **après** avoir détruit les samples
+    al_uninstall_audio();
+}
+
