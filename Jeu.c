@@ -420,6 +420,7 @@ void destroyJeu(Jeu* jeu) {
     free(jeu);
 }
 
+
 int playSound(Jeu* jeu) {
     if (jeu == NULL || jeu->joueur == NULL || jeu->joueur->direction == STATIQUE) {
         return 1;
