@@ -168,6 +168,8 @@ void action(Joueur *joueur, Carte *carte) {
         actionGrassLand(carte,joueur, next_x2, next_y2);
         actionPorte(carte,joueur, next_x, next_y);
         actionPorte(carte,joueur, next_x2, next_y2);
+        actionPnj(carte,joueur, next_x, y);
+        actionPnj(carte,joueur, next_x2, y2);
     }
 }
 

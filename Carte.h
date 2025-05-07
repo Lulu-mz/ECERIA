@@ -13,6 +13,7 @@
 
 #include "Biome.h"
 #include "Maison.h"
+#include "PNJ.h"
 
 
 //TODO : faire une structure image
@@ -38,6 +39,7 @@ typedef struct c {
     Porte* porte;
     int sx;
     int sy;
+    Pnj* pnj;
 }Case;
 
 typedef struct carte {
@@ -63,4 +65,5 @@ void attribuateIDHouse(Carte* carte);
 void saveInterieurMaison(Carte* carte, int pos_i, int pos_j, int id);
 Carte* chargerInterieurMaison(int h, int w, int pos_i, int pos_j, int id);
 Carte* genererInterieurMaison(int h, int w);
+void genererPnj(Carte* carte, int maxPnj);
 #endif //CARTE_H

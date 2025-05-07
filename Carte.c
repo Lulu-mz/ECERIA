@@ -16,6 +16,7 @@ Case chargerCase(int valeur, Case c, int i, int j) {
     c.grassLand = NULL;
     c.porte = NULL;
     c.marchable = false;
+    c.pnj = NULL;
 
     if (valeur == 0) {
         c.grassLand = creerGrassLand(i, j, ARBRE);
@@ -35,7 +36,11 @@ Case chargerCase(int valeur, Case c, int i, int j) {
         c.porte = creerPorte(MAISON_0);
     } else if (valeur == 11) {
         c.porte = creerPorte(MAISON_1);
-    } else {
+    }
+    else if (valeur >= 20 && valeur <= 23) {
+        c.pnj = creerPnj(VACHE);
+    }
+    else {
         c.marchable = true;
     }
     return c;
@@ -166,6 +171,7 @@ Carte *creerCarte(int w, int h) {
             carte->map[i][j].porte = NULL;
             carte->map[i][j].sx = 0;
             carte->map[i][j].sy = 0;
+            carte->map[i][j].pnj = NULL;
 
             switch (valeur) {
                 case 0:
@@ -194,6 +200,7 @@ Carte *creerCarte(int w, int h) {
     }
     genererLac(carte);
     genererGrassLand(carte);
+    genererPnj(carte, 6);
     return carte;
 }
 
@@ -222,7 +229,11 @@ int saveCarte(Carte *carte, int pos_i, int pos_j) {
                 glType = carte->map[i][j].maison->valeur; //soit 3 soit 4 : début pour le type de maison
             } else if (carte->map[i][j].porte != NULL) {
                 glType = carte->map[i][j].porte->val; //soit 10 soit 11 : pour porte double ou simple
-            } else if (carte->map[i][j].vide == true) {
+            }
+            else if (carte->map[i][j].pnj != NULL) {
+                glType = carte->map[i][j].pnj->val;
+            }
+            else if (carte->map[i][j].vide == true) {
                 glType = 99;
             }
             fprintf(grassLandFile, "%d", glType);
@@ -258,6 +269,9 @@ void afficherCarte(Carte *carte) {
             if (carte->map[i][j].maison != NULL) {
                 afficherMaison(carte->map[i][j].maison, j, i);
             }
+            if (carte->map[i][j].pnj != NULL) {
+                afficherPnj(carte->map[i][j].pnj, j, i);
+            }
         }
     }
 }
@@ -269,6 +283,7 @@ void destroyCarte(Carte *carte) {
     for (int i = 0; i < carte->hauteur; i++) {
         free(carte->map[i]);
     }
+
     free(carte->map);
     free(carte);
     carte = NULL;
@@ -362,7 +377,7 @@ int isValidSpaceForHouses(Carte *carte, int pos_x, int pos_y, Maison *m) {
 
 int isValidSpace(Carte *carte, int x, int y) {
     if (carte->map[y][x].grassLand != NULL || carte->map[y][x].maison != NULL || carte->map[y][x].vide == true || carte
-        ->map[y][x].porte != NULL || carte->map[y][x].typeCase == EAU) {
+        ->map[y][x].porte != NULL || carte->map[y][x].typeCase == EAU || carte->map[y][x].pnj != NULL) {
         return 0;
     }
     return 1;
@@ -602,4 +617,18 @@ Carte *genererInterieurMaison(int h, int w) {
         enfant->map[i][j].typeCase = SOL;
     }
     return enfant;
+}
+
+void genererPnj(Carte* carte, int maxPnj) {
+    srand(time(NULL));
+    int i, j;
+    int nbPnj = rand() % maxPnj;
+    for (int k = 0; k < nbPnj; k++) {
+        TypePnj type = rand() % 4;
+        do {
+            i = rand() % carte->hauteur;
+            j = rand() % carte->largeur;
+        } while (isValidSpace(carte, j, i) == 0);
+        carte->map[i][j] = chargerCase((int)type+20, carte->map[i][j], i, j);
+    }
 }

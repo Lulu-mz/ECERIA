@@ -173,7 +173,7 @@ int animation() {
     if (!al_install_audio() || !al_init_acodec_addon()) {
         fprintf(stderr, "Erreur d'initialisation audio.\n");
         cleanUp(timer, queue, window, jeu, sample);
-        return;
+        return -1;
     }
 
     bool running = true;
