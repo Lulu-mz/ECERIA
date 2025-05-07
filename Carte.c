@@ -37,8 +37,17 @@ Case chargerCase(int valeur, Case c, int i, int j) {
     } else if (valeur == 11) {
         c.porte = creerPorte(MAISON_1);
     }
-    else if (valeur >= 20 && valeur <= 23) {
+    // else if (valeur == 20) {
+    //     c.pnj = creerPnj(PERSO_0);
+    // }
+    // else if (valeur == 21) {
+    //     c.pnj = creerPnj(PERSO_1);
+    // }
+    else if (valeur == 20) {
         c.pnj = creerPnj(VACHE);
+    }
+    else if (valeur == 21) {
+        c.pnj = creerPnj(POULE);
     }
     else {
         c.marchable = true;
@@ -124,20 +133,6 @@ Carte *chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j) {
     return carte;
 }
 
-// int generate_random_number() {
-//     int result;
-//
-//     // Décider du groupe : 0 = {0,1,2}, 1 = {5}
-//     int group = rand() % 2;
-//
-//     if (group == 0) {
-//         result = rand() % 3;  // 0,1,2
-//     } else {
-//         result = 5;
-//     }
-//
-//     return result;
-// }
 
 Carte *creerCarte(int w, int h) {
     Carte *carte = malloc(sizeof(Carte));

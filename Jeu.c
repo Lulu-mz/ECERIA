@@ -169,12 +169,19 @@ int animation() {
         return -1;
     }
 
-    // Initialisation audio
     if (!al_install_audio() || !al_init_acodec_addon()) {
         fprintf(stderr, "Erreur d'initialisation audio.\n");
         cleanUp(timer, queue, window, jeu, sample);
         return -1;
     }
+
+    srand(time(NULL));
+
+    bool afficherDialogue = false;
+    int dialogueTimer = 0;
+    int dialogueX = 0, dialogueY = 0;
+
+    char* texteDialogue = NULL;
 
     bool running = true;
 
@@ -189,12 +196,28 @@ int animation() {
         }
 
         if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_E) {
-            action(jeu->joueur, carte);
+            int px, py;
+            action(jeu->joueur, carte, &px, &py);
+            if (px >= 0 && py >= 0 && carte->map[py][px].pnj != NULL) {
+                afficherDialogue = true;
+                dialogueX = px;
+                dialogueY = py;
+                texteDialogue = randomText();
+                dialogueTimer = 120; // durée de la bulle de dialogue (ex. 2 secondes)
+            }
         }
 
         if (event.type == ALLEGRO_EVENT_TIMER) {
             afficherCarte(carte);
             afficherJoueur(jeu->joueur, currentFrame);
+            if (afficherDialogue && dialogueTimer > 0 && texteDialogue != NULL) {
+                afficherBulleDialogue(dialogueX, dialogueY, texteDialogue);
+                dialogueTimer--;
+                if (dialogueTimer <= 0) {
+                    afficherDialogue = false;
+                    texteDialogue = NULL;
+                }
+            }
             al_flip_display();
         }
 
@@ -441,6 +464,53 @@ int playSound(Jeu* jeu) {
     }
     return 0;
 }
+
+char* randomText() {
+    int index = rand()%2;
+
+    char* text[2] = {
+        "Hey",
+        "Comment ca va ?"
+    };
+
+    return text[index];
+}
+
+void afficherBulleDialogue(int tile_x, int tile_y, const char* textToPrint) {
+    float padding = 10;
+    float rayon = 8;
+
+    // Créer la police
+    ALLEGRO_FONT* font = al_create_builtin_font();
+    if (!font) return;
+
+    // Calcul largeur et hauteur texte
+    float largeur_texte = al_get_text_width(font, textToPrint);
+    float hauteur_texte = al_get_font_line_height(font);
+
+    // Taille de la bulle
+    float largeur = largeur_texte + 2 * padding;
+    float hauteur = hauteur_texte + 2 * padding;
+
+    // Position écran en pixels (coin supérieur gauche de la bulle)
+    float x = tile_x * TILE_SIZE;
+    float y = tile_y * TILE_SIZE - hauteur - 10;
+
+    // Couleurs
+    ALLEGRO_COLOR fond = al_map_rgb(255, 255, 255);
+    ALLEGRO_COLOR bordure = al_map_rgb(0, 0, 0);
+    ALLEGRO_COLOR texte = al_map_rgb(0, 0, 0);
+
+    // Affichage bulle
+    al_draw_filled_rounded_rectangle(x, y, x + largeur, y + hauteur, rayon, rayon, fond);
+    al_draw_rounded_rectangle(x, y, x + largeur, y + hauteur, rayon, rayon, bordure, 2);
+
+    // Texte centré
+    al_draw_text(font, texte, x + largeur / 2, y + hauteur / 2 - hauteur_texte / 2, ALLEGRO_ALIGN_CENTER, textToPrint);
+
+    al_destroy_font(font);
+}
+
 
 void cleanUp(ALLEGRO_TIMER *timer, ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_DISPLAY *window, Jeu *jeu, ALLEGRO_SAMPLE *sample) {
     if (jeu) destroyJeu(jeu);

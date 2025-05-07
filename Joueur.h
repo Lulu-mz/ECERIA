@@ -41,11 +41,12 @@ Joueur* chargerJoueur();
 void saveJoueur(Joueur* joueur);
 void destroyJoueur(Joueur* joueur);
 void afficherJoueur(Joueur* joueur, int curentFrame);
-void action(Joueur* joueur, Carte* carte);
+void action(Joueur* joueur, Carte* carte, int* px, int* py);
 void destroyInventaire(Inventaire* inv);
 Item* taperGrassLand(Carte* carte, Joueur* joueur, int x, int y);
 void actionGrassLand(Carte* carte,Joueur* joueur, int x, int y);
 void ouvrirPorte(Carte* carte, Joueur* joueur, int id);
 void deplacerJoueurDevantMaison(Carte* carte, Joueur* joueur, int id_m);
 void actionPorte(Carte* carte, Joueur* joueur, int x, int y);
+void actionPnj(Carte* carte, int x, int y);
 #endif //JOUEUR_H

@@ -56,4 +56,6 @@ int playSound(Jeu* jeu);
 void cleanUp(ALLEGRO_TIMER *timer, ALLEGRO_EVENT_QUEUE *queue, ALLEGRO_DISPLAY *window, Jeu *jeu, ALLEGRO_SAMPLE *sample);
 //Joueur dans le jeu :
 void deplacerJoueur(Jeu* jeu);
+void afficherBulleDialogue(int tile_x, int tile_y, const char* textToPrint);
+char* randomText();
 #endif //JEU_H

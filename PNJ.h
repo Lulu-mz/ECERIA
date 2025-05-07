@@ -8,8 +8,6 @@
 #include <allegro5/bitmap.h>
 
 typedef enum type_pnj {
-   PERSO_0,
-   PERSO_1,
     VACHE,
     POULE,
 }TypePnj;

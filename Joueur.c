@@ -7,6 +7,7 @@
 #include <allegro5/allegro_primitives.h>
 
 #include "Biome.h"
+#include "Jeu.h"
 
 
 //quêtes + déplacements
@@ -124,7 +125,7 @@ void afficherJoueur(Joueur *joueur, int currentFrame) {
 
 
 
-void action(Joueur *joueur, Carte *carte) {
+void action(Joueur *joueur, Carte *carte, int* px, int* py) {
     int next_x = -1; //pour le joueur
     int next_y = -1; //pour le joueur
     int next_x2 = -1; //si on est entre 2 cases
@@ -168,8 +169,19 @@ void action(Joueur *joueur, Carte *carte) {
         actionGrassLand(carte,joueur, next_x2, next_y2);
         actionPorte(carte,joueur, next_x, next_y);
         actionPorte(carte,joueur, next_x2, next_y2);
-        actionPnj(carte,joueur, next_x, y);
-        actionPnj(carte,joueur, next_x2, y2);
+        actionPnj(carte, next_x, next_y);
+        actionPnj(carte, next_x2, next_y2);
+        // On vérifie s’il y a un PNJ
+        if (carte->map[next_y][next_x].pnj != NULL) {
+            *px = next_x;
+            *py = next_y;
+        } else if (carte->map[next_y2][next_x2].pnj != NULL) {
+            *px = next_x2;
+            *py = next_y2;
+        } else {
+            *px = -1;
+            *py = -1;
+        }
     }
 }
 
@@ -240,5 +252,40 @@ void actionPorte(Carte* carte, Joueur* joueur, int x, int y) {
             x_maison -=1;
         } //si y'a une porte à gauche et que c'est double ==> c'est une porte de droite
         ouvrirPorte(carte, joueur, carte->map[y_maison][x_maison].maison->id);
+    }
+}
+
+void talk_to_npc(Carte* carte, int x, int y) { //TODO : s'arranger avec pnj->audio pour les audios...!
+    if(carte->map[y][x].pnj->type == VACHE) {
+        ALLEGRO_SAMPLE *moo = al_load_sample("../Sounds/NPC/cow.wav");
+        if (!moo) {
+            fprintf(stderr, "Impossible de charger le fichier wav\n");
+            return;
+        }
+        al_play_sample(moo, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+    }
+    else if (carte->map[y][x].pnj->type == POULE) {
+        ALLEGRO_SAMPLE *squawk = al_load_sample("../Sounds/NPC/chicken.wav");
+        if (!squawk) {
+            fprintf(stderr, "Impossible de charger le fichier wav\n");
+            return;
+        }
+        al_play_sample(squawk, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+    }
+    // else if(carte->map[y][x].pnj->type == PERSO_0 || carte->map[y][x].pnj->type == PERSO_1){
+    //     ALLEGRO_SAMPLE *laugh = al_load_sample("../Sounds/NPC/hihi.wav");
+    //     if (!laugh) {
+    //         fprintf(stderr, "Impossible de charger le fichier wav\n");
+    //         return;
+    //     }
+    //     al_play_sample(laugh, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+    // }
+}
+
+void actionPnj(Carte* carte, int x, int y) {
+    if (carte->map[y][x].pnj != NULL) {
+        // const char* texte = randomText();
+        // afficherBulleDialogue(x, y, texte);  // Affiche la bulle au-dessus du PNJ
+        talk_to_npc(carte, x, y);
     }
 }
