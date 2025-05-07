@@ -426,13 +426,19 @@ int playSound(Jeu* jeu) {
         return 1;
     }
 
-    ALLEGRO_SAMPLE *sample = al_load_sample("../Sounds/walking_on_grass_2.wav");
-    if (!sample) {
+    ALLEGRO_SAMPLE *grass_walk = al_load_sample("../Sounds/walking_on_grass_2.wav");
+    ALLEGRO_SAMPLE *floor_walk = al_load_sample("../Sounds/walking_on_floor.wav");
+    if (!grass_walk || !floor_walk) {
         fprintf(stderr, "Impossible de charger le fichier wav\n");
         return 1;
     }
 
-    al_play_sample(sample, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+    if(jeu->joueur->inHouse != -1) {
+        al_play_sample(floor_walk, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+    }
+    else {
+        al_play_sample(grass_walk, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
+    }
     return 0;
 }
 
