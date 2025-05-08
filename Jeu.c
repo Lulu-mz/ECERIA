@@ -204,7 +204,7 @@ int animation() {
                 dialogueX = px;
                 dialogueY = py;
                 texteDialogue = randomText();
-                dialogueTimer = 120; // durée de la bulle de dialogue (ex. 2 secondes)
+                dialogueTimer = 180; // durée de la bulle de dialogue en sec
             }
         }
 
@@ -468,11 +468,13 @@ int playSound(Jeu* jeu) {
 }
 
 char* randomText() {
-    int index = rand()%2;
+    int index = rand()%4;
 
-    char* text[2] = {
-        "Hey",
-        "Comment ca va ?"
+    char* text[4] = {
+        "Hey !",
+        "Comment ça va ?",
+        "Quelle belle journée !",
+        "Souhaites tu échanger quelque chose de ton inventaire ?"
     };
 
     return text[index];
