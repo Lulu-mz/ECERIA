@@ -161,6 +161,7 @@ int animation() {
 
     int currentFrame = 0;
     int frameTime = 0;
+    int totalFrame = 0;
 
     Jeu* jeu = menu(queue);  // Chargement du menu + carte choisie
     if (!jeu) {
@@ -208,7 +209,7 @@ int animation() {
         }
 
         if (event.type == ALLEGRO_EVENT_TIMER) {
-            afficherCarte(carte);
+            afficherCarte(carte, totalFrame);
             afficherJoueur(jeu->joueur, currentFrame);
             if (afficherDialogue && dialogueTimer > 0 && texteDialogue != NULL) {
                 afficherBulleDialogue(dialogueX, dialogueY, texteDialogue);
@@ -240,6 +241,7 @@ int animation() {
         frameTime += 16;
         if (frameTime >= 600) {
             currentFrame = (currentFrame + 1) % 2;
+            totalFrame = (totalFrame + 1) % 2000000000;
             frameTime = 0;
         }
     }

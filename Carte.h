@@ -51,7 +51,7 @@ typedef struct carte {
 }Carte;
 
 Carte* chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j);
-void afficherCarte(Carte* carte);
+void afficherCarte(Carte* carte, int currentFrame);
 void destroyCarte(Carte* carte);
 void chargerBiome(Carte* carte, int pos_i, int pos_j);
 Carte* creerCarte(int w, int h);
@@ -59,6 +59,7 @@ int saveCarte(Carte* carte, int pos_i, int pos_j);
 int genererMaisons(Carte* carte);
 int compterMaison(Carte* carte, int pos_i, int pos_j);
 void genererLac(Carte* carte);
+void generationLacPropagation(Carte* carte, int i,int j, int tailleMax);
 void genererGrassLand(Carte* carte);
 int isValidSpace(Carte* carte, int x, int y);
 void attribuateIDHouse(Carte* carte);

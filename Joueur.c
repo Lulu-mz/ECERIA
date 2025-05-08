@@ -255,37 +255,10 @@ void actionPorte(Carte* carte, Joueur* joueur, int x, int y) {
     }
 }
 
-void talk_to_npc(Carte* carte, int x, int y) { //TODO : s'arranger avec pnj->audio pour les audios...!
-    if(carte->map[y][x].pnj->type == VACHE) {
-        ALLEGRO_SAMPLE *moo = al_load_sample("../Sounds/NPC/cow.wav");
-        if (!moo) {
-            fprintf(stderr, "Impossible de charger le fichier wav\n");
-            return;
-        }
-        al_play_sample(moo, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
-    }
-    else if (carte->map[y][x].pnj->type == POULE) {
-        ALLEGRO_SAMPLE *squawk = al_load_sample("../Sounds/NPC/chicken.wav");
-        if (!squawk) {
-            fprintf(stderr, "Impossible de charger le fichier wav\n");
-            return;
-        }
-        al_play_sample(squawk, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
-    }
-    // else if(carte->map[y][x].pnj->type == PERSO_0 || carte->map[y][x].pnj->type == PERSO_1){
-    //     ALLEGRO_SAMPLE *laugh = al_load_sample("../Sounds/NPC/hihi.wav");
-    //     if (!laugh) {
-    //         fprintf(stderr, "Impossible de charger le fichier wav\n");
-    //         return;
-    //     }
-    //     al_play_sample(laugh, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
-    // }
-}
-
 void actionPnj(Carte* carte, int x, int y) {
     if (carte->map[y][x].pnj != NULL) {
         // const char* texte = randomText();
         // afficherBulleDialogue(x, y, texte);  // Affiche la bulle au-dessus du PNJ
-        talk_to_npc(carte, x, y);
+        al_play_sample(carte->map[y][x].pnj->audio, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
     }
 }

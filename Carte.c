@@ -37,17 +37,14 @@ Case chargerCase(int valeur, Case c, int i, int j) {
     } else if (valeur == 11) {
         c.porte = creerPorte(MAISON_1);
     }
-    // else if (valeur == 20) {
-    //     c.pnj = creerPnj(PERSO_0);
-    // }
-    // else if (valeur == 21) {
-    //     c.pnj = creerPnj(PERSO_1);
-    // }
     else if (valeur == 20) {
         c.pnj = creerPnj(VACHE);
     }
     else if (valeur == 21) {
         c.pnj = creerPnj(POULE);
+    }
+    else if (valeur == 22) {
+        c.pnj = creerPnj(PERSO_0);
     }
     else {
         c.marchable = true;
@@ -248,7 +245,7 @@ int saveCarte(Carte *carte, int pos_i, int pos_j) {
 }
 
 
-void afficherCarte(Carte *carte) {
+void afficherCarte(Carte *carte, int currentFrame) {
     for (int i = 0; i < carte->hauteur; i++) {
         for (int j = 0; j < carte->largeur; j++) {
             int imageL = 16, imageH = 16;
@@ -265,7 +262,7 @@ void afficherCarte(Carte *carte) {
                 afficherMaison(carte->map[i][j].maison, j, i);
             }
             if (carte->map[i][j].pnj != NULL) {
-                afficherPnj(carte->map[i][j].pnj, j, i);
+                afficherPnj(carte->map[i][j].pnj, j, i, currentFrame);
             }
         }
     }
@@ -412,44 +409,39 @@ int genererMaisons(Carte *carte) {
 }
 
 void genererLac(Carte *carte) {
-    ALLEGRO_BITMAP *lac = al_load_bitmap("../Assets/Cats/Tilesets/Water.png");
-    if (!lac) {
-        printf("Erreur de chargement de l'image\n");
-        exit(1);
-    }
+
     srand(time(NULL));
-    int nbLac = rand() % 4; //0, 1, 2 ou 3 lacs
+    int nbLac = rand()%3;
     int i, j;
     for (int k = 0; k < nbLac; k++) {
         do {
             i = rand() % carte->hauteur;
             j = rand() % carte->largeur;
-        } while (isValidSpace(carte, j, i) == 0 || isValidSpace(carte, j + 1, i) == 0 || isValidSpace(carte, j, i + 1)
-                 == 0 || isValidSpace(carte, j + 1, i + 1) == 0);
+        } while (isValidSpace(carte, j, i) == 0);
+        generationLacPropagation(carte,i,j,5);
+    }
+}
+
+void generationLacPropagation(Carte* carte, int i,int j, int tailleMax){
+    ALLEGRO_BITMAP *lac = al_load_bitmap("../Assets/Cats/Tilesets/Water.png");
+    if (!lac) {
+        printf("Erreur de chargement de l'image\n");
+        exit(1);
+    }
+    if (tailleMax <= 0 || i < 0 || j < 0 || i >= WIDTH || j >= HEIGHT ) return;
+    if (isValidSpace(carte,j,i)) {
         carte->map[i][j].typeCase = EAU;
         carte->map[i][j].marchable = false;
+        carte->map[i][j].image = lac;
         carte->map[i][j].sx = 0;
         carte->map[i][j].sy = 0;
-        carte->map[i][j].image = lac;
-
-        carte->map[i + 1][j].typeCase = EAU;
-        carte->map[i + 1][j].marchable = false;
-        carte->map[i + 1][j].sx = 0;
-        carte->map[i + 1][j].sy = 0;
-        carte->map[i + 1][j].image = lac;
-
-        carte->map[i][j + 1].typeCase = EAU;
-        carte->map[i][j + 1].marchable = false;
-        carte->map[i][j + 1].sx = 0;
-        carte->map[i][j + 1].sy = 0;
-        carte->map[i][j + 1].image = lac;
-
-        carte->map[i + 1][j + 1].typeCase = EAU;
-        carte->map[i + 1][j + 1].marchable = false;
-        carte->map[i + 1][j + 1].sx = 0;
-        carte->map[i + 1][j + 1].sy = 0;
-        carte->map[i + 1][j + 1].image = lac;
     }
+
+    // propagation aléatoire
+    if (rand() % 2) generationLacPropagation(carte, i + 1, j, tailleMax - 1);
+    if (rand() % 2) generationLacPropagation(carte, i - 1, j, tailleMax - 1);
+    if (rand() % 2) generationLacPropagation(carte, i, j + 1, tailleMax - 1);
+    if (rand() % 2) generationLacPropagation(carte, i, j - 1, tailleMax - 1);
 }
 
 void genererGrassLand(Carte *carte) {
@@ -619,7 +611,7 @@ void genererPnj(Carte* carte, int maxPnj) {
     int i, j;
     int nbPnj = rand() % maxPnj;
     for (int k = 0; k < nbPnj; k++) {
-        TypePnj type = rand() % 4;
+        TypePnj type = rand() % 3;
         do {
             i = rand() % carte->hauteur;
             j = rand() % carte->largeur;

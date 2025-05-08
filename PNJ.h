@@ -10,6 +10,7 @@
 typedef enum type_pnj {
     VACHE,
     POULE,
+    PERSO_0
 }TypePnj;
 
 typedef struct pnj {
@@ -23,11 +24,8 @@ typedef struct pnj {
     int val;
 }Pnj;
 
-//TODO : faire les audio qd on fait une action
-//TODO : faire les actions qd on parle à un pnj
-
 Pnj* creerPnj(TypePnj type);
 Pnj* chargerPnj();
 void destroyPnj(Pnj* pnj);
-void afficherPnj(Pnj* pnj, int x, int y);
+void afficherPnj(Pnj* pnj, int x, int y, int currentFrame);
 #endif //PNJ_H
