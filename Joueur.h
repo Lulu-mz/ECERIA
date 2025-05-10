@@ -50,5 +50,5 @@ void ouvrirPorte(Carte* carte, Joueur* joueur, int id);
 void deplacerJoueurDevantMaison(Carte* carte, Joueur* joueur, int id_m);
 void actionPorte(Carte* carte, Joueur* joueur, int x, int y);
 void actionPnj(Carte* carte, int x, int y);
-const char* trade(Joueur* joueur, Pnj* pnj, ALLEGRO_EVENT_QUEUE* queue);
+const char* trade(Joueur* joueur, Pnj* pnj, ALLEGRO_EVENT_QUEUE* queue, int x, int y, Carte* carte);
 #endif //JOUEUR_H

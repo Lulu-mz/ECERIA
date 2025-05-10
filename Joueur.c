@@ -265,7 +265,7 @@ void actionPnj(Carte* carte, int x, int y) {
     }
 }
 
-const char* trade(Joueur* joueur, Pnj* pnj, ALLEGRO_EVENT_QUEUE* queue){
+const char* trade(Joueur* joueur, Pnj* pnj, ALLEGRO_EVENT_QUEUE* queue, int x, int y, Carte* carte){
     ALLEGRO_FONT *font = al_load_ttf_font("../Assets/Arial.ttf", 20, 0);
     TradeResult result = afficherMenuTrade(pnj,font,queue);
     if(result == TRADE_ACCEPT){
@@ -276,14 +276,21 @@ const char* trade(Joueur* joueur, Pnj* pnj, ALLEGRO_EVENT_QUEUE* queue){
             if(joueur->inventaire->items[pos]->nb==0) {
                 joueur->inventaire->items[pos] = NULL;
             }
+            al_destroy_font(font);
             return NULL;
 
         }else{
+            actionPnj(carte, x, y);
+            al_destroy_font(font);
             return "Pas assez de matériaux";
         }
     }
     if(result == TRADE_REFUSE){
+        actionPnj(carte, x, y);
+        al_destroy_font(font);
         return "Peut-être une prochaine fois";
     }
+
+    al_destroy_font(font);
     return NULL;
 }
