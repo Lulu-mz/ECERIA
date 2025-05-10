@@ -33,6 +33,17 @@ Item *creerItem(TypeItem type) {
             item->image = al_load_bitmap("../Assets/Cats/Objects/biome.png");
             item->sx = 32;
             item->sy = 32;
+        break;
+
+        case HACHE :
+            item->sx = 16;
+            item->sy = 0;
+        break;
+
+        case PIOCHE :
+            item->sx = 32;
+            item->sy = 0;
+        break;
     }
     return item;
 }
@@ -170,4 +181,3 @@ void destroyInventaire(Inventaire* inv) {
     free(inv);
     inv = NULL;
 }
-

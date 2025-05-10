@@ -35,11 +35,13 @@ Joueur *createJoueur() {
     joueur->inHouse = -1;
 
     ALLEGRO_BITMAP *sprite_sheet = al_load_bitmap("../Assets/Cats/Characters/Character.png");
-    if (!sprite_sheet) {
+    ALLEGRO_BITMAP *imageAction = al_load_bitmap("../Assets/Cats/Characters/Character_actions.png");
+    if (!sprite_sheet || !imageAction) {
         printf("Erreur de chargement de l'image\n");
         exit(1);
     }
     joueur->image = sprite_sheet;
+    joueur->image_action = imageAction;
     return joueur;
 }
 
@@ -114,7 +116,7 @@ void afficherJoueur(Joueur *joueur, int currentFrame) {
             }
         break;
     }
-    al_draw_rectangle(joueur->x1, joueur->y1, joueur->x2, joueur->y2, al_map_rgba(255, 0, 0, 50), 2);//hitbox
+    //al_draw_rectangle(joueur->x1, joueur->y1, joueur->x2, joueur->y2, al_map_rgba(255, 0, 0, 50), 2);//hitbox
     int imageL = 16;
     int imageH = 16;
     al_draw_scaled_bitmap(joueur->image,  (joueur->sprite_x + (currentFrame * 3)) * 16, joueur->sprite_y * 16, imageL,
@@ -261,4 +263,27 @@ void actionPnj(Carte* carte, int x, int y) {
         // afficherBulleDialogue(x, y, texte);  // Affiche la bulle au-dessus du PNJ
         al_play_sample(carte->map[y][x].pnj->audio, 1.0f, 0.0f, 1.0f, ALLEGRO_PLAYMODE_ONCE, NULL);
     }
+}
+
+const char* trade(Joueur* joueur, Pnj* pnj, ALLEGRO_EVENT_QUEUE* queue){
+    ALLEGRO_FONT *font = al_load_ttf_font("../Assets/Arial.ttf", 20, 0);
+    TradeResult result = afficherMenuTrade(pnj,font,queue);
+    if(result == TRADE_ACCEPT){
+        int pos = findItem(joueur->inventaire, pnj->tradeIn->type);
+        if(pos != -1 && joueur->inventaire->items[pos]->nb >= pnj->tradeIn->nb){
+            ajouterItem(joueur->inventaire,  pnj->tradeOut);
+            joueur->inventaire->items[pos]->nb -= pnj->tradeOut->nb;
+            if(joueur->inventaire->items[pos]->nb==0) {
+                joueur->inventaire->items[pos] = NULL;
+            }
+            return NULL;
+
+        }else{
+            return "Pas assez de matériaux";
+        }
+    }
+    if(result == TRADE_REFUSE){
+        return "Peut-être une prochaine fois";
+    }
+    return NULL;
 }

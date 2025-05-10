@@ -15,10 +15,6 @@
 #include "Maison.h"
 #include "PNJ.h"
 
-
-//TODO : faire une structure image
-
-
 typedef enum type {
     HERBE,
     HERBE2,

@@ -26,6 +26,7 @@ typedef struct j {
     float x2, y2;
     Deplacement direction;
     ALLEGRO_BITMAP* image;
+    ALLEGRO_BITMAP* image_action;
     float sprite_x;
     float sprite_y;
     int degats;
@@ -49,4 +50,5 @@ void ouvrirPorte(Carte* carte, Joueur* joueur, int id);
 void deplacerJoueurDevantMaison(Carte* carte, Joueur* joueur, int id_m);
 void actionPorte(Carte* carte, Joueur* joueur, int x, int y);
 void actionPnj(Carte* carte, int x, int y);
+const char* trade(Joueur* joueur, Pnj* pnj, ALLEGRO_EVENT_QUEUE* queue);
 #endif //JOUEUR_H

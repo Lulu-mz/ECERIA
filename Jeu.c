@@ -205,6 +205,13 @@ int animation() {
                 dialogueY = py;
                 texteDialogue = randomText();
                 dialogueTimer = 180; // durée de la bulle de dialogue en sec
+
+                // On regarde si un message de trade doit être affiché :
+                const char* tradeMsg = trade(jeu->joueur, carte->map[py][px].pnj, queue);
+                if(tradeMsg != NULL) {
+                    texteDialogue = tradeMsg;
+                    dialogueTimer = 180; // durée de la bulle de dialogue en sec
+                }
             }
         }
 

@@ -9,7 +9,7 @@
 
 
 typedef enum typeItem {
-    BOIS, PIERRE, FRUIT
+    BOIS, PIERRE, FRUIT, HACHE, PIOCHE
 }TypeItem;
 
 typedef struct item {
@@ -38,4 +38,6 @@ void afficherInventaire(Inventaire* inv);
 void ajouterItem(Inventaire* inv, Item* item);
 Item* ajouter_n_item(Item* item, int n, TypeItem type);
 Item *creerItem(TypeItem type);
+int findItem(Inventaire *inv, TypeItem type);
+int removeItem(Inventaire* inv, TypeItem type,int qte);
 #endif //INVENTAIRE_H

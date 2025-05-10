@@ -91,6 +91,9 @@ Carte *chargerCarte(int mapWidth, int mapHeight, int pos_i, int pos_j) {
             carte->map[i][j].marchable = true;
             carte->map[i][j].sx = 0;
             carte->map[i][j].sy = 0;
+            carte->map[i][j].pnj = NULL;
+            carte->map[i][j].porte = NULL;
+            carte->map[i][j].maison = NULL;
 
             switch (valeur) {
                 case 0:
@@ -250,7 +253,7 @@ void afficherCarte(Carte *carte, int currentFrame) {
         for (int j = 0; j < carte->largeur; j++) {
             int imageL = 16, imageH = 16;
             if (carte->map[i][j].vide == false && carte->map[i][j].porte == NULL) {
-                al_draw_rectangle(j * 32, i * 32, j * 32 + 32, i * 32 + 32, al_map_rgb(0, 0, 0), 2);
+                //al_draw_rectangle(j * 32, i * 32, j * 32 + 32, i * 32 + 32, al_map_rgb(0, 0, 0), 2);
                 al_draw_scaled_bitmap(carte->map[i][j].image, carte->map[i][j].sx, carte->map[i][j].sy, imageL, imageH,
                                       j * carte->map[i][j].size, i * carte->map[i][j].size, carte->map[i][j].size,
                                       carte->map[i][j].size, 0);
@@ -521,6 +524,7 @@ Carte *chargerInterieurMaison(int h, int w, int pos_i, int pos_j, int id) {
             carteM->map[i][j].grassLand = NULL;
             carteM->map[i][j].vide = false;
             carteM->map[i][j].porte = NULL;
+            carteM->map[i][j].pnj = NULL;
             carteM->map[i][j].image = NULL;
             carteM->map[i][j].size = TILE_SIZE;
             carteM->map[i][j].sx = 0;
@@ -584,6 +588,7 @@ Carte *genererInterieurMaison(int h, int w) {
             enfant->map[i][j].sx = 0;
             enfant->map[i][j].sy = 0;
             enfant->map[i][j].typeCase = NOIR;
+            enfant->map[i][j].pnj = NULL;
         }
     }
     for (int i = marge_h; i < enfant->hauteur - marge_h; i++) {
